@@ -1,0 +1,11 @@
+stable-baselines3[extra]
+jupyterlab
+signal-temporal-logic
+imageio
+cma
+ipywidgets
+pyglet==1.5
+moarchiving
+pygame
+swig
+gym[box2d]==0.21
