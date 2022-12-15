@@ -1,4 +1,2 @@
-rl-baselines3-zoo/
-.python-version
-.ipynb_checkpoints
-outcmaes
+outcmaes/
+**/__pycache__/
