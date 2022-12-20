@@ -1,8 +1,3 @@
-import sys
-from os import path
-
-sys.path.append(path.dirname(path.dirname(__file__)))
-
 import os
 
 import matplotlib.pyplot as plt
@@ -51,7 +46,7 @@ evaluator.heatmap(
 )
 plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % boundary)
 plt.savefig('gifs/lunar-lander-ppo/robustness.png', bbox_inches='tight')
-plt.show()
+# plt.show()
 
 # Use Random Solver
 random_solver = RandomSolver(sys_eval)
@@ -64,4 +59,4 @@ plt.ylabel('Minimum distance')
 boxplot([data1, data2], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.options()['restarts']),
         ['CMA', 'Random'])
 plt.savefig('gifs/lunar-lander-ppo/sample-boxplot.png', bbox_inches='tight')
-plt.show()
+# plt.show()
