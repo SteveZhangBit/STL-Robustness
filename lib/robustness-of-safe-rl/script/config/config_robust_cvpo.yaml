@@ -1,0 +1,138 @@
+###################### runner configs ######################
+seed: 0
+device: "cpu"
+# if device is gpu, specify the gpu id
+device_id: 0
+# if device is cpu, specify the thread num
+threads: 4
+policy_name: "robust_cvpo"
+
+# training configs
+epochs: 500
+warmup: False
+evaluate_episode_num: 2
+save_best_epoch: 0
+evaluate_episode_num_after_save_best: 3
+save_every_epoch: 10
+# compute the score of a model to save; score = - cost + reward/normalizer
+reward_normalizer: 20
+eval_attackers: ["mad", "amad", "random", "max_cost", "max_reward"]
+
+exp_name: null
+# data dir to save the logger files
+data_dir: null
+load_dir: null
+verbose: True
+
+###################### env configs ######################
+env_cfg:
+    env_name: 'SafetyAntRun-v0'
+    # Maximum steps per episode, use this to terminate one episode if it takes too many steps.
+    # This is a environment-specific parameter. Determine this carefully based on your gym env.
+    # If this is -1, it will be based on the env._max_episode_steps
+    timeout_steps: 300
+    cost_limit: &COST_LIM 5
+    # cost normalizer is used to scale the binary indicator cost. The cost in the replay buffer would be 1/cost_normalizer
+    cost_normalizer: &CN 5
+
+###################### adversary configs ######################
+adv_cfg:
+    noise_scale: &NS 0.05
+    attack_freq: 1
+    # MAD attacker config
+    mad_cfg: &MAD
+        lr_adv: 0.1
+        max_iterations: 60
+        tol: 1.0e-4
+        eps_tol: 1.0e-4
+        kl_thres: 10000000
+    amad_cfg:
+        lr_adv: 0.1
+        max_iterations: 60
+        tol: 1.0e-4
+        eps_tol: 1.0e-4
+        kl_thres: 10000000
+        # only attack the states with attack_fraction highest qc values
+        attack_fraction: 0.2
+
+    # Critic attacker config
+    max_cost_cfg:
+        lr_adv: 0.2
+        max_iterations: 60
+        tol: 1.0e-4
+        eps_tol: 1.0e-4
+        kl_thres: 10000000
+        reward_weight: 0
+        cost_weight: 0.5
+    max_reward_cfg:
+        lr_adv: 0.2
+        max_iterations: 60
+        tol: 1.0e-4
+        eps_tol: 1.0e-4
+        kl_thres: 10000000
+        reward_weight: 0.5
+        cost_weight: 0
+    min_reward_cfg:
+        lr_adv: 0.1
+        max_iterations: 60
+        tol: 1.0e-4
+        eps_tol: 1.0e-4
+        kl_thres: 10000000
+        reward_weight: -0.5
+        cost_weight: 0
+
+    uniform_cfg: {}
+    gaussian_cfg: {}
+
+policy_cfg:
+    safe_rl: True
+    use_polyak_update_policy: False
+    actor_lr: 0.001
+    critic_lr: 0.001
+    # actor critic model_config:
+    hidden_sizes: [256, 256]
+    # Entropy regularization coefficient.
+    gamma: 0.99
+    polyak: 0.995
+    num_q: 2
+    batch_size: 300
+    buffer_size: 80000
+    sample_episode_num: 20
+    episode_rerun_num: 40
+    num_qc: 1
+
+    n_step: 1
+    use_retrace: False
+    unroll_length: 10
+    td_error_lim: 10
+    grad_norm_lim: 0.01
+    retrace_lambda: 1
+
+    ############ E-step config ############
+    dual_constraint: 0.1 
+    sample_action_num: 32
+    use_torch_solver: True
+    # torch solver config 
+    lam_max: 500
+    solver_lr: 0.02
+    solver_max_iter: 10
+    solver_use_prev_init: True
+
+    ############ M-step config ############
+    mstep_iteration_num: 15
+    kl_mean_constraint: 0.01 
+    kl_var_constraint: 0.0001 
+    alpha_mean_scale: 1.0 
+    alpha_var_scale: 100.0 
+    alpha_mean_max: 0.1 
+    alpha_var_max: 10.0 
+    
+    ################ adversarial training ################
+    # mle: joint training of the policy with obs and obs_adv
+    # kl: restrict kl between pi(obs) and pi(obs_adv) in M-step
+    # vanilla: normal cvpo
+    rs_mode: "hard_kl_mle" # random, vanilla_adv, em_all_adv, hard_kl_mle, hard_kl, mle, soft_kl, soft_kl_mle
+    attacker: "gaussian" # this is just a placeholder since the attacker will be initialized based on rs_mode
+    
+    adv_start_epoch: 0 # when to start adversarial training
+    adv_incr_epoch: 50 # how many episodes needed to increase perturbation from 0 to max
