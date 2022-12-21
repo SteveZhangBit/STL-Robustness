@@ -748,8 +748,9 @@ class DevLunarLander(DeviatableEnv):
 
 
 class SafetyProp(STLEvaluator):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, pickle_safe=False):
+        super().__init__(pickle_safe)
+
         env = LunarLander(enable_wind=True, continuous=True)
         obs_space = env.observation_space
         self.angle_range = np.asarray([obs_space.low[4], obs_space.high[4]])

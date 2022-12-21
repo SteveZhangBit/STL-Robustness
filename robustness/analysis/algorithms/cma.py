@@ -49,7 +49,7 @@ class CMASolver(Solver):
                 return np.clip(np.random.normal(x0, boundary / 2), 0.0, 1.0)
             
             cfun = cma.ConstrainedFitnessAL(
-                lambda x: self.sys_evaluator.eval_sys(scale(x, dev_bounds))[0],
+                lambda x: self.sys_evaluator.eval_sys(scale(x, dev_bounds), problem)[0],
                 lambda x: constraints(scale(x, dev_bounds)),
                 find_feasible_first=True
             )
