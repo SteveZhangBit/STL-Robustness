@@ -58,8 +58,9 @@ class DevCartPole(DeviatableEnv):
 
 
 class SafetyProp(STLEvaluator):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, pickle_safe=False):
+        super().__init__(pickle_safe)
+
         obs_space = ParamCartPoleEnv().observation_space
         self.pos_range = np.asarray([obs_space.low[0], obs_space.high[0]])
         self.angle_range = np.asarray([obs_space.low[2], obs_space.high[2]])

@@ -29,7 +29,7 @@ class NSGA2Solver(Solver):
         self.popsize = popsize
     
     def min_unsafe_deviation(self, problem: Problem, boundary=None):
-        p = pg.problem(problem, self.sys_evaluator)
+        p = pg.problem(MOMinDev(problem, self.sys_evaluator))
         algo = pg.algorithm(pg.nsga2(gen=self.gen, m=0.1))
         pop = pg.population(p, size=self.popsize)
 

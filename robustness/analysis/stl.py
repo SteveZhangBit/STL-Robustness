@@ -5,8 +5,9 @@ from robustness.analysis import TraceEvaluator
 
 
 class STLEvaluator(TraceEvaluator):
-    def __init__(self):
+    def __init__(self, pickle_safe=False):
         self._phi = None
+        self.pickle_safe = pickle_safe
 
     def prop(self):
         '''
@@ -24,9 +25,12 @@ class STLEvaluator(TraceEvaluator):
     def _compute_rob(self, record):
         time_index = np.arange(len(record))
         signal = self.build_signal(record, time_index)
-        if self._phi is None:
-            self._phi = self.prop()
-        rob = stl.compute_robustness(self._phi, signal)
+        if self.pickle_safe:
+            rob = stl.compute_robustness(self.prop(), signal)
+        else:
+            if self._phi is None:
+                self._phi = self.prop()
+            rob = stl.compute_robustness(self._phi, signal)
         return rob.at(0)
 
     def eval_trace(self, obs_record, reward_record):
