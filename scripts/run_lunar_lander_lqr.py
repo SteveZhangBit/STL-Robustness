@@ -13,7 +13,6 @@ from robustness.envs.lunar_lander import (FPS, SCALE, VIEWPORT_H, VIEWPORT_W,
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
 
-os .makedirs('gifs/lunar-lander-lqr', exist_ok=True)
 
 winds = [0.0, 20.0]
 turbulences = [0.0, 2.0]
