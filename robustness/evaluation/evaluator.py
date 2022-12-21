@@ -26,15 +26,28 @@ class Evaluator:
     def min_violation(self, boundary=None):
         return self.solver.min_unsafe_deviation(self.problem, boundary)
 
-    def visualize_violation(self, delta, gif=None):
-        _, x0 = self.solver.sys_evaluator.eval_sys(delta, self.problem)
-        env, _ = self.problem.env.instantiate(delta)
+    def visualize_violation(self, delta, gif=None, **kwargs):
+        v, x0 = self.solver.sys_evaluator.eval_sys(delta, self.problem)
+        env, _ = self.problem.env.instantiate(delta, **kwargs)
         visualizer = EpisodeVisualizer(env, self.problem.agent, self.problem.phi)
-        visualizer.visual_episode(
-            self.solver.sys_evaluator.options()['episode_len'],
-            x0,
-            gif=gif,
-        )
+        if v < 0:
+            v = np.inf
+            for _ in range(100):
+                v = visualizer.visual_episode(
+                    self.solver.sys_evaluator.options()['episode_len'],
+                    x0,
+                    gif=gif,
+                )
+                if v < 0:
+                    break
+            if v > 0:
+                print("WARNING: Unable to reproduce the counterexample.")
+        else:
+            visualizer.visual_episode(
+                self.solver.sys_evaluator.options()['episode_len'],
+                x0,
+                gif=gif,
+            )
         env.close()
     
     def grid_data(self, x_bound, y_bound, n_x, n_y, override=False, out_dir='data'):
@@ -147,7 +160,8 @@ class EpisodeVisualizer:
         return np.array(self.fig.canvas.buffer_rgba())
 
     def visual_episode(self, episode_len, x0=None, sleep=0.01, gif=None):
-        os.makedirs(os.path.dirname(gif))
+        if gif is not None:
+            os.makedirs(os.path.dirname(gif), exist_ok=True)
 
         if x0 is not None:
             obs = self.env.reset_to(x0)
@@ -156,7 +170,9 @@ class EpisodeVisualizer:
         self.agent.reset()
         if gif is not None:
             gif_data = []
-        self._init_fig()
+            self._init_fig()
+        else:
+            self.env.render()
         space = self.env.observation_space
         total_reward = 0.0
         obs_record = [obs]
@@ -169,15 +185,18 @@ class EpisodeVisualizer:
             obs_record.append(np.clip(obs, space.low, space.high))
             reward_record.append(reward)
 
-            fig_data = self._update_fig(
-                step, total_reward, done,
-                self.phi.eval_trace(np.array(obs_record), np.array(reward_record))
-            )
             if gif is not None:
+                fig_data = self._update_fig(
+                    step, total_reward, done,
+                    self.phi.eval_trace(np.array(obs_record), np.array(reward_record))
+                )
                 gif_data.append(fig_data)
-
-            if sleep > 0.0:
-                time.sleep(sleep)
+            else:
+                self.env.render()
+                if sleep > 0.0:
+                    time.sleep(sleep)
 
         if gif is not None:
             imageio.mimsave(gif, [data for data in gif_data], fps=10)
+
+        return self.phi.eval_trace(np.array(obs_record), np.array(reward_record))

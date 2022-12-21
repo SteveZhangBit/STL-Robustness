@@ -12,7 +12,6 @@ from robustness.envs.cartpole import DevCartPole, SafetyProp
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
 
-os.makedirs('gifs/cartpole-dqn', exist_ok=True)
 
 # Initialize environment and controller
 masses = [0.1, 2.0]

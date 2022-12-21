@@ -12,7 +12,6 @@ from robustness.envs.lunar_lander import DevLunarLander, SafetyProp
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
 
-os .makedirs('gifs/lunar-lander-ppo', exist_ok=True)
 
 winds = [0.0, 20.0]
 turbulences = [0.0, 2.0]
