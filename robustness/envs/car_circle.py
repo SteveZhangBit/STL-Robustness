@@ -67,7 +67,7 @@ class DevCarCircle(DeviatableEnv):
 class SafetyProp(STLEvaluator):
     def prop(self):
         x = stl.Predicate('x')
-        return stl.Always( x < 0.65 )
+        return stl.Always( x < 0.7 )
     
     def build_signal(self, record, time_index):
         return {

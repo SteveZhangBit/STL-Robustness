@@ -10,7 +10,7 @@ class CMASystemEvaluator(SystemEvaluator):
         super().__init__(phi, opts)
         self.sigma = sigma
     
-    def eval_sys(self, delta, problem: Problem):
+    def eval_sys(self, delta, problem: Problem, logger=None):
         timeout = self._options['timeout']
         restarts = self._options['restarts']
         max_evals = self._options['evals']
@@ -24,7 +24,10 @@ class CMASystemEvaluator(SystemEvaluator):
             restarts=restarts,
         )
         env.close()
-        return es.result.fbest, scale(x, x0_bounds)
+        v, x0 = es.result.fbest, scale(x, x0_bounds)
+        if logger is not None:
+            logger.add_dev(delta, v, x0)
+        return v, x0
 
 
 class CMASolver(Solver):
@@ -32,7 +35,7 @@ class CMASolver(Solver):
         super().__init__(sys_evaluator, opts)
         self.sigma = sigma
 
-    def any_unsafe_deviation(self, problem: Problem, boundary=None):
+    def any_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
         delta = None
         dist = np.inf
 
@@ -87,7 +90,7 @@ class CMASolver(Solver):
         
         return delta, dist
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None):
+    def min_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
         min_dist = np.inf
         min_delta = None
 
@@ -98,15 +101,17 @@ class CMASolver(Solver):
         dev_bounds = problem.env.get_dev_bounds()
 
         if boundary is not None:
-            constraints = lambda delta: [self.sys_evaluator.eval_sys(delta, problem)[0],
+            constraints = lambda delta: [self.sys_evaluator.eval_sys(delta, problem, logger=logger)[0],
                                          problem.dist.eval_dist(delta) - boundary]
         else:
-            constraints = lambda delta: [self.sys_evaluator.eval_sys(delta, problem)[0]]
+            constraints = lambda delta: [self.sys_evaluator.eval_sys(delta, problem, logger=logger)[0]]
 
         def random_x0():
             x0 = normalize(problem.env.get_delta_0(), dev_bounds)
             return np.clip(np.random.normal(x0, self.sigma), 0.0, 1.0)
 
+        if logger is not None:
+            logger.new_trial()
         for _ in range(1 + restarts):
             cfun = cma.ConstrainedFitnessAL(
                 lambda x: problem.dist.eval_dist(scale(x, dev_bounds)),
