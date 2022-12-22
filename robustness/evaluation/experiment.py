@@ -20,6 +20,8 @@ class Experiment:
         return data, data_times
     
     def run_one_max_sample(self, name, sample, n=10, out_dir='data'):
+        os.makedirs(out_dir, exist_ok=True)
+
         dists_name = f"{out_dir}/{name}-dists-{n}-{sample}.csv"
         times_name = f"{out_dir}/{name}-times-{n}-{sample}.csv"
         if os.path.exists(dists_name) and os.path.exists(times_name):
