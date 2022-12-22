@@ -6,7 +6,7 @@ from robustness.analysis import *
 
 
 class RandomSolver(Solver):
-    def any_unsafe_deviation(self, problem: Problem, boundary=None):
+    def any_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
         dist = np.inf
         delta = None
 
@@ -28,7 +28,7 @@ class RandomSolver(Solver):
         
         return delta, dist
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None):
+    def min_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
         min_dist = np.inf
         min_delta = None
 

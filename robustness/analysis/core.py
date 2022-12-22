@@ -93,8 +93,8 @@ class Solver:
     def options(self):
         return self._options.copy()
 
-    def any_unsafe_deviation(self, problem: Problem, boundary=None):
+    def any_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
         raise NotImplementedError()
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None):
+    def min_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
         raise NotImplementedError()

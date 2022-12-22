@@ -614,12 +614,12 @@ class Drone(bases.Agent):
             area: float,
             propeller_pitch: float,
             v0: float = 0,
-            air_density: float = 1.225
+            # air_density: float = 1.225
     ) -> float:
         """Determine thrust force based on current rotor speed. """
         tmp = angular_speed / (2*np.pi) * propeller_pitch
         diameter = (4. * area / np.pi)**0.5
-        return air_density * area * (tmp**2 - tmp*v0) * (self.k1 * diameter / propeller_pitch)**self.k2
+        return self.air_density * area * (tmp**2 - tmp*v0) * (self.k1 * diameter / propeller_pitch)**self.k2
 
     def collect_information_after_step(self):
         """Determine if Drone agent touches the ground plane."""

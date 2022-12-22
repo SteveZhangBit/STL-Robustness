@@ -20,34 +20,41 @@ class Evaluator:
         print('System evaluation options:')
         print(solver.sys_evaluator.options())
     
-    def any_violation(self, boundary=None):
-        return self.solver.any_unsafe_deviation(self.problem, boundary)
+    def any_violation(self, boundary=None, logger=None):
+        return self.solver.any_unsafe_deviation(self.problem, boundary, logger=logger)
     
-    def min_violation(self, boundary=None):
-        return self.solver.min_unsafe_deviation(self.problem, boundary)
+    def min_violation(self, boundary=None, logger=None):
+        return self.solver.min_unsafe_deviation(self.problem, boundary, logger=logger)
 
-    def visualize_violation(self, delta, gif=None, **kwargs):
-        v, x0 = self.solver.sys_evaluator.eval_sys(delta, self.problem)
+    def visualize_violation(self, delta, x0=None, gif=None, **kwargs):
         env, _ = self.problem.env.instantiate(delta, **kwargs)
         visualizer = EpisodeVisualizer(env, self.problem.agent, self.problem.phi)
-        if v < 0:
-            v = np.inf
-            for _ in range(100):
-                v = visualizer.visual_episode(
-                    self.solver.sys_evaluator.options()['episode_len'],
-                    x0,
-                    gif=gif,
-                )
-                if v < 0:
-                    break
-            if v > 0:
-                print("WARNING: Unable to reproduce the counterexample.")
-        else:
+        if x0 is not None:
             visualizer.visual_episode(
                 self.solver.sys_evaluator.options()['episode_len'],
                 x0,
                 gif=gif,
             )
+        else:
+            v, x0 = self.solver.sys_evaluator.eval_sys(delta, self.problem)
+            if v < 0:
+                v = np.inf
+                for _ in range(100):
+                    v = visualizer.visual_episode(
+                        self.solver.sys_evaluator.options()['episode_len'],
+                        x0,
+                        gif=gif,
+                    )
+                    if v < 0:
+                        break
+                if v > 0:
+                    print("WARNING: Unable to reproduce the counterexample.")
+            else:
+                visualizer.visual_episode(
+                    self.solver.sys_evaluator.options()['episode_len'],
+                    x0,
+                    gif=gif,
+                )
         env.close()
     
     def grid_data(self, x_bound, y_bound, n_x, n_y, override=False, out_dir='data'):
