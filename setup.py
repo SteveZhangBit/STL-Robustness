@@ -14,8 +14,11 @@ setuptools.setup(
         'cma',
         'moarchiving',
         'numpy',
+        'scipy',
         'matplotlib',
-        'signal_temporal_logic'
+        'signal_temporal_logic',
+        'imageio',
+        'pygmo',
     ],
     packages=setuptools.find_packages(),
     classifiers=[
