@@ -6,7 +6,7 @@ import numpy as np
 from robustness.agents.cartpole import PID
 from robustness.analysis import Problem
 from robustness.analysis.algorithms import (CMASolver, CMASystemEvaluator,
-                                            RandomSolver)
+                                            RandomSolver, ExpectationSysEvaluator)
 from robustness.analysis.utils import L2Norm
 from robustness.envs.cartpole import DevCartPole, SafetyProp
 from robustness.evaluation import Evaluator, Experiment
@@ -30,6 +30,7 @@ evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 data1, _ = experiment.run_diff_max_samples('CMA', np.arange(50, 151, 25), out_dir='data/cartpole-pid/cma')
 plt.rc('axes', labelsize=12, titlesize=13)
+plt.figure()
 evaluator.heatmap(
     masses, forces, 25, 25,
     x_name="Masses", y_name="Forces", z_name="System Evaluation $\Gamma$",
@@ -39,7 +40,7 @@ evaluator.heatmap(
 )
 plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % np.min(data1))
 plt.savefig('gifs/cartpole-pid/robustness.png', bbox_inches='tight')
-plt.show()
+# plt.show()
 
 # Use Random Solver
 random_solver = RandomSolver(sys_eval)
@@ -47,9 +48,36 @@ evaluator2 = Evaluator(prob, random_solver)
 experiment2 = Experiment(evaluator2)
 data2, _ = experiment2.run_diff_max_samples('Random', np.arange(50, 151, 25), out_dir='data/cartpole-pid/random')
 
+plt.figure()
 plt.xlabel('Number of samples')
 plt.ylabel('Minimum distance')
 boxplot([data1, data2], ['red', 'blue'], np.arange(50, 151, 25) * (1 + solver.options()['restarts']),
         ['CMA', 'Random'])
 plt.savefig('gifs/cartpole-pid/sample-boxplot.png', bbox_inches='tight')
-plt.show()
+# plt.show()
+
+
+sys_eval3 = ExpectationSysEvaluator(
+    phi,
+    {'timeout': 1, 'episode_len': 200}
+)
+solver3 = CMASolver(0.2, sys_eval3)
+evaluator3 = Evaluator(prob, solver3)
+experiment3 = Experiment(evaluator3)
+data3, _ = experiment3.run_diff_max_samples('Expc', np.arange(50, 151, 25), out_dir='data/cartpole-pid/expc')
+plt.figure()
+evaluator3.heatmap(
+    masses, forces, 25, 25,
+    x_name="Masses", y_name="Forces", z_name="System Evaluation $\Gamma$",
+    out_dir='data/cartpole-pid/expc',
+    boundary=np.min(data3),
+)
+plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % np.min(data3))
+plt.savefig('gifs/cartpole-pid/robustness-expc.png', bbox_inches='tight')
+
+plt.figure()
+plt.xlabel('Number of samples')
+plt.ylabel('Minimum distance')
+boxplot([data1, data3], ['red', 'blue'], np.arange(50, 151, 25) * (1 + solver.options()['restarts']),
+        ['CMA', 'CMA-Expc'])
+plt.savefig('gifs/cartpole-pid/sample-boxplot-expc.png', bbox_inches='tight')

@@ -5,6 +5,28 @@ import numpy as np
 from robustness.analysis import *
 
 
+class ExpectationSysEvaluator(SystemEvaluator):
+    def eval_sys(self, delta, problem: Problem, logger=None):
+        restarts = self._options['restarts']
+        timeout = self._options['timeout'] * (1 + restarts)
+        max_evals = self._options['evals'] * (1 + restarts)
+
+        env, x0_bounds = problem.env.instantiate(delta)
+        vs = []
+        start = datetime.now()
+        for _ in range(max_evals):
+            v = self._eval_trace(
+                np.random.uniform(low=x0_bounds[:, 0], high=x0_bounds[:, 1]),
+                env,
+                problem.agent
+            )
+            vs.append(v)
+            if (datetime.now() - start).total_seconds() > timeout * 60:
+                break
+        env.close()
+        return np.mean(vs), None
+
+
 class RandomSolver(Solver):
     def any_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
         dist = np.inf
