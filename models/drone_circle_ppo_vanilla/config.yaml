@@ -1,0 +1,99 @@
+mode: train
+seed: 0
+device: cpu
+device_id: 0
+threads: 4
+policy_name: robust_ppo_lag
+epochs: 500
+save_best_epoch: 400
+save_every_epoch: 250
+warmup: false
+evaluate_episode_num: 5
+reward_normalizer: 20
+eval_attackers:
+- uniform
+exp_name: robust_ppo_lag_mode_vanilla
+data_dir: SafetyDroneCircle-v0_cost_5_benchmark_ppo
+load_dir: null
+verbose: false
+suffix: null
+env_cfg:
+    env_name: SafetyDroneCircle-v0
+    timeout_steps: 300
+    cost_limit: 5
+    cost_normalizer: 5
+adv_cfg:
+    noise_scale: 0.05
+    attack_freq: 1
+    mad_cfg:
+        lr_adv: 0.1
+        max_iterations: 60
+        tol: 0.0001
+        eps_tol: 0.0001
+        kl_thres: 10000000
+    amad_cfg:
+        lr_adv: 0.05
+        max_iterations: 60
+        tol: 0.0001
+        eps_tol: 0.0001
+        kl_thres: 10000000
+        attack_fraction: 0.1
+    max_cost_cfg:
+        lr_adv: 0.1
+        max_iterations: 60
+        tol: 0.0001
+        eps_tol: 0.0001
+        kl_thres: 10000000
+        reward_weight: 0
+        cost_weight: 0.5
+    max_reward_cfg:
+        lr_adv: 0.1
+        max_iterations: 60
+        tol: 0.0001
+        eps_tol: 0.0001
+        kl_thres: 10000000
+        reward_weight: 0.5
+        cost_weight: 0
+    min_reward_cfg:
+        lr_adv: 0.1
+        max_iterations: 60
+        tol: 0.0001
+        eps_tol: 0.0001
+        kl_thres: 10000000
+        reward_weight: -0.5
+        cost_weight: 0
+    uniform_cfg: {}
+    gaussian_cfg: {}
+policy_cfg:
+    safe_rl: true
+    KP: 0.1
+    KI: 0.003
+    KD: 0.001
+    per_state: false
+    use_adv_multiplier: false
+    actor_lr: 0.0003
+    critic_lr: 0.001
+    hidden_sizes:
+    - 128
+    - 128
+    gamma: 0.99
+    polyak: 0.995
+    rs_mode: vanilla
+    kl_coef: 1
+    lam: 0.97
+    batch_size: 300
+    buffer_size: 100000
+    clip_ratio: 0.2
+    clip_ratio_adv: 0.8
+    weight_adv: 1
+    target_kl: 0.01
+    train_actor_iters: 80
+    update_adv_freq: 100
+    train_critic_iters: 80
+    eval_attack_freq: 1
+    interact_steps: 20000
+    episode_rerun_num: 40
+    attacker_names:
+    - uniform
+    start_epoch: 20
+    decay_epoch: 150

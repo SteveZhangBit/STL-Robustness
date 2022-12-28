@@ -1,4 +1,4 @@
-from robustness.agents.car_circle import PPOVanilla
+from robustness.agents.rsrl import PPOVanilla
 from robustness.analysis import Problem
 from robustness.analysis.utils import L2Norm, scale
 from robustness.envs.car_run import DevCarRun, SafetyProp
@@ -6,7 +6,7 @@ from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.logger import Logger
 from robustness.evaluation.utils import boxplot
 from robustness.analysis.algorithms import (CMASolver, CMASystemEvaluator,
-                                            RandomSolver)
+                                            RandomSolver, ExpectationSysEvaluator)
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -47,6 +47,7 @@ evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 data1, _ = experiment.run_diff_max_samples('CMA', np.arange(25, 126, 25), out_dir='data/car-run-ppo/cma')
 plt.rc('axes', labelsize=12, titlesize=13)
+plt.figure()
 evaluator.heatmap(
     speed, steering, 25, 25,
     x_name="Speed Multiplier", y_name="Steering Multiplier", z_name="System Evaluation $\Gamma$",
@@ -68,3 +69,29 @@ plt.ylabel('Minimum distance')
 boxplot([data1, data2], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.options()['restarts']),
         ['CMA', 'Random'])
 plt.savefig('gifs/car-run-ppo/sample-boxplot.png', bbox_inches='tight')
+
+
+sys_eval3 = ExpectationSysEvaluator(
+    phi,
+    {'timeout': 1, 'restarts': 1, 'episode_len': 200, 'evals': 50}
+)
+solver3 = CMASolver(0.2, sys_eval3)
+evaluator3 = Evaluator(prob, solver3)
+experiment3 = Experiment(evaluator3)
+data3, _ = experiment3.run_diff_max_samples('Expc', np.arange(25, 126, 25), out_dir='data/car-run-ppo/expc')
+plt.figure()
+evaluator3.heatmap(
+    speed, steering, 25, 25,
+    x_name="Speed Multiplier", y_name="Steering Multiplier", z_name="System Evaluation $\Gamma$",
+    out_dir='data/car-run-ppo/expc',
+    boundary=np.min(data3),
+)
+plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % np.min(data3))
+plt.savefig('gifs/car-run-ppo/robustness-expc.png', bbox_inches='tight')
+
+plt.figure()
+plt.xlabel('Number of samples')
+plt.ylabel('Minimum distance')
+boxplot([data1, data3], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.options()['restarts']),
+        ['CMA', 'CMA-Expc'])
+plt.savefig('gifs/car-run-ppo/sample-boxplot-expc.png', bbox_inches='tight')
