@@ -16,18 +16,23 @@ class CMASystemEvaluator(SystemEvaluator):
         max_evals = self._options['evals']
 
         env, x0_bounds = problem.env.instantiate(delta)
-        x, es = cma.fmin2(
-            lambda x: self._eval_trace(scale(x, x0_bounds), env, problem.agent),
-            lambda: np.random.rand(len(x0_bounds)),
-            self.sigma,
-            {'bounds': [0.0, 1.0], 'maxfevals': max_evals, 'timeout': timeout * 60, 'verbose': -9},
-            restarts=restarts,
-        )
+        min_v = np.inf
+        min_x0 = None
+        for _ in range(1 + restarts):
+            x, es = cma.fmin2(
+                lambda x: self._eval_trace(scale(x, x0_bounds), env, problem.agent),
+                lambda: np.random.rand(len(x0_bounds)),
+                self.sigma,
+                {'bounds': [0.0, 1.0], 'maxfevals': max_evals, 'timeout': timeout * 60, 'verbose': -9},
+            )
+            v, x0 = es.result.fbest, scale(x, x0_bounds)
+            if v < min_v:
+                min_v = v
+                min_x0 = x0
         env.close()
-        v, x0 = es.result.fbest, scale(x, x0_bounds)
         if logger is not None:
-            logger.add_dev(delta, v, x0)
-        return v, x0
+            logger.add_dev(delta, min_v, min_x0)
+        return min_v, min_x0
 
 
 class CMASolver(Solver):
@@ -56,37 +61,39 @@ class CMASolver(Solver):
                 lambda x: constraints(scale(x, dev_bounds)),
                 find_feasible_first=True
             )
-            _, es = cma.fmin2(
-                cfun,
-                random_x0,
-                self.sigma,
-                {'bounds': [0.0, 1.0], 'tolstagnation': 0, 'tolx': 1e-4, 'timeout': timeout * 60,
-                 'maxfevals': max_evals},
-                callback=cfun.update,
-                restarts=restarts
-            )
-            print("=============== CMA Results:=================>")
-            print(es.result)
+            for _ in range(1 + restarts):
+                _, es = cma.fmin2(
+                    cfun,
+                    random_x0,
+                    self.sigma,
+                    {'bounds': [0.0, 1.0], 'tolstagnation': 0, 'tolx': 1e-4, 'timeout': timeout * 60,
+                    'maxfevals': max_evals},
+                    callback=cfun.update,
+                )
+                print("=============== CMA Results:=================>")
+                print(es.result)
 
-            if cfun.best_feas.info is not None and cfun.best_feas.info['f'] < 0:
-                print("=============== CMA Feasible Results: ==============>")
-                print(cfun.best_feas.info)
-                delta = scale(cfun.best_feas.info['x'], dev_bounds)
-                dist = problem.dist.eval_dist(delta)
+                if cfun.best_feas.info is not None and cfun.best_feas.info['f'] < 0:
+                    print("=============== CMA Feasible Results: ==============>")
+                    print(cfun.best_feas.info)
+                    delta = scale(cfun.best_feas.info['x'], dev_bounds)
+                    dist = problem.dist.eval_dist(delta)
+                    break
         else:
-            _, es = cma.fmin2(
-                lambda x: self.sys_evaluator.eval_sys(scale(x, dev_bounds), problem)[0],
-                lambda: np.random.rand(len(problem.env.get_delta_0())),
-                self.sigma,
-                {'bounds': [0.0, 1.0], 'tolstagnation': 0, 'tolx': 1e-4, 'timeout': timeout * 60,
-                 'ftarget': 0.0, 'maxfevals': max_evals},
-                restarts=restarts,
-            )
-            print("=============== CMA Results:=================>")
-            print(es.result)
-            if es.result.fbest < 0.0:
-                delta = scale(es.result.xbest, dev_bounds)
-                dist = problem.dist.eval_dist(delta)
+            for _ in range(1 + restarts):
+                _, es = cma.fmin2(
+                    lambda x: self.sys_evaluator.eval_sys(scale(x, dev_bounds), problem)[0],
+                    lambda: np.random.rand(len(problem.env.get_delta_0())),
+                    self.sigma,
+                    {'bounds': [0.0, 1.0], 'tolstagnation': 0, 'tolx': 1e-4, 'timeout': timeout * 60,
+                     'ftarget': 0.0, 'maxfevals': max_evals},
+                )
+                print("=============== CMA Results:=================>")
+                print(es.result)
+                if es.result.fbest < 0.0:
+                    delta = scale(es.result.xbest, dev_bounds)
+                    dist = problem.dist.eval_dist(delta)
+                    break
         
         return delta, dist
     

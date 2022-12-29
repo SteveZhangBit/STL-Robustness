@@ -21,13 +21,13 @@ def before_each(pickle_safe=False):
 
     # Create problem and solver
     prob = Problem(env, agent, phi, L2Norm(env))
-    sys_eval = CMASystemEvaluator(0.4, phi, {'timeout': 1, 'episode_len': 100, 'evals': 5})
+    sys_eval = CMASystemEvaluator(0.4, phi, {'timeout': 1, 'episode_len': 100, 'evals': 5, 'restarts': 1})
 
     return prob, sys_eval
 
 # Use CMA
 prob, sys_eval = before_each()
-solver = CMASolver(0.2, sys_eval, {'evals': 10})
+solver = CMASolver(0.2, sys_eval, {'evals': 10, 'restarts': 1})
 evaluator = Evaluator(prob, solver)
 evaluator.any_violation()
 evaluator.any_violation(0.4)
@@ -36,7 +36,7 @@ evaluator.min_violation(0.4)
 
 # Use Random Solver
 prob, sys_eval = before_each()
-random_solver = RandomSolver(sys_eval, {'evals': 10})
+random_solver = RandomSolver(sys_eval, {'evals': 10, 'restarts': 1})
 evaluator = Evaluator(prob, random_solver)
 evaluator.any_violation()
 evaluator.any_violation(0.4)
