@@ -59,6 +59,7 @@ boxplot([data1, data2], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.op
         ['CMA', 'Random'])
 plt.savefig('gifs/car-run-ppo/sample-boxplot.png', bbox_inches='tight')
 
+print("===========================> Running expectation evaluator:")
 sys_eval3 = ExpectationSysEvaluator(
     phi,
     {'timeout': 1, 'restarts': 1, 'episode_len': 200, 'evals': 50}
