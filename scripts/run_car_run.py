@@ -33,17 +33,6 @@ evaluator = Evaluator(prob, solver)
 
 # evaluator.visualize_violation(env.delta_0, render=True)
 
-# import time
-
-# inst, _ = env.instantiate(env.get_delta_0(), render=True)
-# obs = inst.reset_to([-0.04228255, -0.09996222,  1.57141873])
-# time.sleep(2)
-# for _ in range(300):
-#     obs, reward, _, _ = inst.step(agent.next_action(obs))
-#     # print(obs[1], np.linalg.norm(obs[2:4]))
-#     time.sleep(0.01)
-# inst.close()
-
 experiment = Experiment(evaluator)
 data1, _ = experiment.run_diff_max_samples('CMA', np.arange(25, 126, 25), out_dir='data/car-run-ppo/cma')
 plt.rc('axes', labelsize=12, titlesize=13)
@@ -69,7 +58,6 @@ plt.ylabel('Minimum distance')
 boxplot([data1, data2], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.options()['restarts']),
         ['CMA', 'Random'])
 plt.savefig('gifs/car-run-ppo/sample-boxplot.png', bbox_inches='tight')
-
 
 sys_eval3 = ExpectationSysEvaluator(
     phi,
