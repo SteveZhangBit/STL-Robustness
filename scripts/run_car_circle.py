@@ -20,7 +20,7 @@ phi = SafetyProp()
 prob = Problem(env, agent, phi, L2Norm(env))
 sys_eval = CMASystemEvaluator(
     0.4, phi,
-    {'timeout': 1, 'restarts': 1, 'episode_len': 300, 'evals': 40}
+    {'timeout': 1, 'restarts': 0, 'episode_len': 300, 'evals': 40}
 )
 
 solver = CMASolver(0.1, sys_eval)
@@ -28,7 +28,7 @@ evaluator = Evaluator(prob, solver)
 
 # from datetime import datetime
 # start = datetime.now()
-# print(sys_eval.eval_sys([20, 0.5], prob))
+# print(sys_eval.eval_sys(env.delta_0, prob))
 # print(datetime.now() - start)
 
 experiment = Experiment(evaluator)
@@ -61,8 +61,14 @@ plt.savefig('gifs/car-circle-ppo/sample-boxplot.png', bbox_inches='tight')
 print("===========================> Running expectation evaluator:")
 sys_eval3 = ExpectationSysEvaluator(
     phi,
-    {'timeout': 1, 'restarts': 1, 'episode_len': 300, 'evals': 40}
+    {'timeout': 1, 'restarts': 0, 'episode_len': 300, 'evals': 40}
 )
+
+# from datetime import datetime
+# start = datetime.now()
+# print(sys_eval3.eval_sys(env.delta_0, prob))
+# print(datetime.now() - start)
+
 solver3 = CMASolver(0.1, sys_eval3)
 evaluator3 = Evaluator(prob, solver3)
 experiment3 = Experiment(evaluator3)
