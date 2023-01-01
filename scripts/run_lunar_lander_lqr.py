@@ -13,6 +13,11 @@ from robustness.envs.lunar_lander import (FPS, SCALE, VIEWPORT_H, VIEWPORT_W,
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
 
+os.makedirs('gifs/lunar-lander-lqr', exist_ok=True)
+plt.rc('axes', labelsize=17, titlesize=17)
+plt.rc('xtick', labelsize=14)
+plt.rc('ytick', labelsize=14)
+plt.rc('legend', fontsize=14)
 
 winds = [0.0, 20.0]
 turbulences = [0.0, 2.0]
@@ -30,24 +35,29 @@ sys_eval = CMASystemEvaluator(
 solver = CMASolver(0.2, sys_eval)
 evaluator = Evaluator(prob, solver)
 
+# from datetime import datetime
+# start = datetime.now()
+# print(sys_eval.eval_sys(env.delta_0, prob))
+# print(datetime.now() - start)
+
 experiment = Experiment(evaluator)
 data1, _ = experiment.run_diff_max_samples('CMA', np.arange(25, 126, 25), out_dir='data/lunar-lander-lqr/cma')
 
 # FIXME: use boxplot to remove outlier
-b = plt.boxplot(np.ndarray.flatten(np.asarray(data1)))
-boundary = [l.get_ydata()[1] for l in b['whiskers']][0]
+# b = plt.boxplot(np.ndarray.flatten(np.asarray(data1)))
+# boundary = [l.get_ydata()[1] for l in b['whiskers']][0]
+boundary = np.min(data1)
 
-plt.rc('axes', labelsize=12, titlesize=13)
 plt.figure()
 evaluator.heatmap(
     winds, turbulences, 25, 25,
-    x_name="Winds", y_name="Turbulences", z_name="System Evaluation $\Gamma$",
+    x_name="Wind", y_name="Turbulence", z_name="System Evaluation $\Gamma$",
     out_dir='data/lunar-lander-lqr',
     boundary=boundary,
     vmax=0.1, vmin=-0.4
 )
 plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % boundary)
-plt.savefig('gifs/lunar-lander-lqr/robustness.png', bbox_inches='tight')
+plt.savefig('gifs/lunar-lander-lqr/fig-robustness.png', bbox_inches='tight')
 # plt.show()
 
 # Use Random Solver
@@ -61,7 +71,7 @@ plt.xlabel('Number of samples')
 plt.ylabel('Minimum distance')
 boxplot([data1, data2], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.options()['restarts']),
         ['CMA', 'Random'])
-plt.savefig('gifs/lunar-lander-lqr/sample-boxplot.png', bbox_inches='tight')
+plt.savefig('gifs/lunar-lander-lqr/fig-boxplot.png', bbox_inches='tight')
 # plt.show()
 
 
@@ -82,12 +92,12 @@ experiment3 = Experiment(evaluator3)
 plt.figure()
 evaluator3.heatmap(
     winds, turbulences, 25, 25,
-    x_name="Winds", y_name="Turbulences", z_name="System Evaluation $\Gamma$",
+    x_name="Wind", y_name="Turbulence", z_name="System Evaluation $\Gamma$",
     out_dir='data/lunar-lander-lqr/expc',
     # boundary=np.min(data3),
 )
 # plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % np.min(data3))
-plt.savefig('gifs/lunar-lander-lqr/robustness-expc.png', bbox_inches='tight')
+plt.savefig('gifs/lunar-lander-lqr/fig-robustness-expc.png', bbox_inches='tight')
 
 # plt.figure()
 # plt.xlabel('Number of samples')

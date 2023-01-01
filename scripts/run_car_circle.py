@@ -1,14 +1,24 @@
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+
 from robustness.agents.rsrl import PPOVanilla
 from robustness.analysis import Problem
+from robustness.analysis.algorithms import (CMASolver, CMASystemEvaluator,
+                                            ExpectationSysEvaluator,
+                                            RandomSolver)
 from robustness.analysis.utils import L2Norm, scale
 from robustness.envs.car_circle import DevCarCircle, SafetyProp
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.logger import Logger
 from robustness.evaluation.utils import boxplot
-from robustness.analysis.algorithms import (CMASolver, CMASystemEvaluator,
-                                            RandomSolver, ExpectationSysEvaluator)
-import matplotlib.pyplot as plt
-import numpy as np
+
+os.makedirs('gifs/car-circle-ppo', exist_ok=True)
+plt.rc('axes', labelsize=17, titlesize=17)
+plt.rc('xtick', labelsize=14)
+plt.rc('ytick', labelsize=14)
+plt.rc('legend', fontsize=14)
 
 load_dir = 'models/car_circle_ppo_vanilla/model_save/model.pt'
 speed = [5.0, 60.0]
@@ -33,7 +43,6 @@ evaluator = Evaluator(prob, solver)
 
 experiment = Experiment(evaluator)
 data1, _ = experiment.run_diff_max_samples('CMA', np.arange(25, 126, 25), out_dir='data/car-circle-ppo/cma')
-plt.rc('axes', labelsize=12, titlesize=13)
 plt.figure()
 evaluator.heatmap(
     speed, steering, 25, 25,
@@ -42,7 +51,7 @@ evaluator.heatmap(
     boundary=np.min(data1),
 )
 plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % np.min(data1))
-plt.savefig('gifs/car-circle-ppo/robustness.png', bbox_inches='tight')
+plt.savefig('gifs/car-circle-ppo/fig-robustness.png', bbox_inches='tight')
 
 # Use Random Solver
 random_solver = RandomSolver(sys_eval)
@@ -56,7 +65,7 @@ plt.xlabel('Number of samples')
 plt.ylabel('Minimum distance')
 boxplot([data1, data2], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.options()['restarts']),
         ['CMA', 'Random'])
-plt.savefig('gifs/car-circle-ppo/sample-boxplot.png', bbox_inches='tight')
+plt.savefig('gifs/car-circle-ppo/fig-boxplot.png', bbox_inches='tight')
 
 print("===========================> Running expectation evaluator:")
 sys_eval3 = ExpectationSysEvaluator(
@@ -81,11 +90,11 @@ evaluator3.heatmap(
     boundary=np.min(data3),
 )
 plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % np.min(data3))
-plt.savefig('gifs/car-circle-ppo/robustness-expc.png', bbox_inches='tight')
+plt.savefig('gifs/car-circle-ppo/fig-robustness-expc.png', bbox_inches='tight')
 
 plt.figure()
 plt.xlabel('Number of samples')
 plt.ylabel('Minimum distance')
 boxplot([data1, data3], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.options()['restarts']),
         ['CMA', 'CMA-Expc'])
-plt.savefig('gifs/car-circle-ppo/sample-boxplot-expc.png', bbox_inches='tight')
+plt.savefig('gifs/car-circle-ppo/fig-boxplot-expc.png', bbox_inches='tight')
