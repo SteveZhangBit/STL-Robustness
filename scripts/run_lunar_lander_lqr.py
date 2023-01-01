@@ -69,23 +69,29 @@ sys_eval3 = ExpectationSysEvaluator(
     phi,
     {'timeout': 1, 'restarts': 1, 'episode_len': 300, 'evals': 40}
 )
+
+# from datetime import datetime
+# start = datetime.now()
+# print(sys_eval3.eval_sys(env.delta_0, prob))
+# print(datetime.now() - start)
+
 solver3 = CMASolver(0.2, sys_eval3)
 evaluator3 = Evaluator(prob, solver3)
 experiment3 = Experiment(evaluator3)
-data3, _ = experiment3.run_diff_max_samples('Expc', np.arange(25, 126, 25), out_dir='data/lunar-lander-lqr/expc')
+# data3, _ = experiment3.run_diff_max_samples('Expc', np.arange(25, 126, 25), out_dir='data/lunar-lander-lqr/expc')
 plt.figure()
 evaluator3.heatmap(
     winds, turbulences, 25, 25,
     x_name="Winds", y_name="Turbulences", z_name="System Evaluation $\Gamma$",
     out_dir='data/lunar-lander-lqr/expc',
-    boundary=np.min(data3),
+    # boundary=np.min(data3),
 )
-plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % np.min(data3))
+# plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % np.min(data3))
 plt.savefig('gifs/lunar-lander-lqr/robustness-expc.png', bbox_inches='tight')
 
-plt.figure()
-plt.xlabel('Number of samples')
-plt.ylabel('Minimum distance')
-boxplot([data1, data3], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.options()['restarts']),
-        ['CMA', 'CMA-Expc'])
-plt.savefig('gifs/lunar-lander-lqr/sample-boxplot-expc.png', bbox_inches='tight')
+# plt.figure()
+# plt.xlabel('Number of samples')
+# plt.ylabel('Minimum distance')
+# boxplot([data1, data3], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.options()['restarts']),
+#         ['CMA', 'CMA-Expc'])
+# plt.savefig('gifs/lunar-lander-lqr/sample-boxplot-expc.png', bbox_inches='tight')
