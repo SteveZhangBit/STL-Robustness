@@ -27,7 +27,7 @@ phi = SafetyProp()
 prob = Problem(env, agent, phi, L2Norm(env))
 sys_eval = CMASystemEvaluator(
     0.4, phi, 
-    {'timeout': 1, 'restarts': 1, 'episode_len': 300, 'evals': 40}
+    {'timeout': 1, 'restarts': 0, 'episode_len': 300, 'evals': 40}
 )
 
 # from datetime import datetime
@@ -76,7 +76,7 @@ plt.savefig('gifs/lunar-lander-ppo/fig-boxplot.png', bbox_inches='tight')
 
 sys_eval3 = ExpectationSysEvaluator(
     phi,
-    {'timeout': 1, 'restarts': 1, 'episode_len': 300, 'evals': 40}
+    {'timeout': 1, 'restarts': 0, 'episode_len': 300, 'evals': 40}
 )
 
 # from datetime import datetime
