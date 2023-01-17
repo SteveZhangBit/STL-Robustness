@@ -38,3 +38,14 @@ class STLEvaluator(TraceEvaluator):
     
     def __str__(self) -> str:
         return 'STL'
+
+
+class STLEvaluator2(TraceEvaluator):
+    def eval_trace(self, obs_record, reward_record):
+        rob = np.array([self.eval_one_timepoint(x) for x in obs_record])
+        positive = rob[rob > 0].sum()
+        negative = rob[rob < 0].sum()
+        return negative if negative < 0 else positive
+    
+    def eval_one_timepoint(self, obs):
+        raise NotImplementedError()
