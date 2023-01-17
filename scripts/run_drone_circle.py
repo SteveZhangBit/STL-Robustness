@@ -10,7 +10,6 @@ from robustness.analysis.algorithms import (CMASolver, CMASystemEvaluator,
 from robustness.analysis.utils import L2Norm, scale
 from robustness.envs.drone_circle import DevDroneCircle, SafetyProp
 from robustness.evaluation import Evaluator, Experiment
-from robustness.evaluation.logger import Logger
 from robustness.evaluation.utils import boxplot
 
 load_dir = 'models/drone_circle_ppo_vanilla/model_save/model.pt'

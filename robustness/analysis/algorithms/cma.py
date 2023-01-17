@@ -10,7 +10,7 @@ class CMASystemEvaluator(SystemEvaluator):
         super().__init__(phi, opts)
         self.sigma = sigma
     
-    def eval_sys(self, delta, problem: Problem, logger=None):
+    def eval_sys(self, delta, problem: Problem):
         timeout = self._options['timeout']
         restarts = self._options['restarts']
         max_evals = self._options['evals']
@@ -30,8 +30,6 @@ class CMASystemEvaluator(SystemEvaluator):
                 min_v = v
                 min_x0 = x0
         env.close()
-        if logger is not None:
-            logger.add_dev(delta, min_v, min_x0)
         return min_v, min_x0
 
 
@@ -40,15 +38,22 @@ class CMASolver(Solver):
         super().__init__(sys_evaluator, opts)
         self.sigma = sigma
 
-    def any_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
+    def any_unsafe_deviation(self, problem: Problem, boundary=None):
         delta = None
         dist = np.inf
+        logger = {}
 
         restarts = self._options['restarts']
         timeout = self._options['timeout']
         max_evals = self._options['evals']
 
         dev_bounds = problem.env.get_dev_bounds()
+
+        def eval_sys(delta):
+            v, x0 = self.sys_evaluator.eval_sys(delta, problem)
+            logger[tuple(delta)] = x0
+            return v
+
         if boundary is not None:
             constraints = lambda delta: [problem.dist.eval_dist(delta) - boundary]
 
@@ -57,7 +62,7 @@ class CMASolver(Solver):
                 return np.clip(np.random.normal(x0, boundary / 2), 0.0, 1.0)
             
             cfun = cma.ConstrainedFitnessAL(
-                lambda x: self.sys_evaluator.eval_sys(scale(x, dev_bounds), problem)[0],
+                lambda x: eval_sys(scale(x, dev_bounds)),
                 lambda x: constraints(scale(x, dev_bounds)),
                 find_feasible_first=True
             )
@@ -82,7 +87,7 @@ class CMASolver(Solver):
         else:
             for _ in range(1 + restarts):
                 _, es = cma.fmin2(
-                    lambda x: self.sys_evaluator.eval_sys(scale(x, dev_bounds), problem)[0],
+                    lambda x: eval_sys(scale(x, dev_bounds)),
                     lambda: np.random.rand(len(problem.env.get_delta_0())),
                     self.sigma,
                     {'bounds': [0.0, 1.0], 'tolstagnation': 0, 'tolx': 1e-4, 'timeout': timeout * 60,
@@ -95,11 +100,13 @@ class CMASolver(Solver):
                     dist = problem.dist.eval_dist(delta)
                     break
         
-        return delta, dist
+        x0 = logger[tuple(delta)] if delta is not None else None
+        return delta, dist, x0
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
+    def min_unsafe_deviation(self, problem: Problem, boundary=None):
         min_dist = np.inf
         min_delta = None
+        logger = {}
 
         restarts = self._options['restarts']
         timeout = self._options['timeout']
@@ -107,18 +114,21 @@ class CMASolver(Solver):
 
         dev_bounds = problem.env.get_dev_bounds()
 
+        def eval_sys(delta):
+            v, x0 = self.sys_evaluator.eval_sys(delta, problem)
+            logger[tuple(delta)] = x0
+            return v
+
         if boundary is not None:
-            constraints = lambda delta: [self.sys_evaluator.eval_sys(delta, problem, logger=logger)[0],
+            constraints = lambda delta: [eval_sys(delta),
                                          problem.dist.eval_dist(delta) - boundary]
         else:
-            constraints = lambda delta: [self.sys_evaluator.eval_sys(delta, problem, logger=logger)[0]]
+            constraints = lambda delta: [eval_sys(delta)]
 
         def random_x0():
             x0 = normalize(problem.env.get_delta_0(), dev_bounds)
             return np.clip(np.random.normal(x0, self.sigma), 0.0, 1.0)
 
-        if logger is not None:
-            logger.new_trial()
         for _ in range(1 + restarts):
             cfun = cma.ConstrainedFitnessAL(
                 lambda x: problem.dist.eval_dist(scale(x, dev_bounds)),
@@ -148,4 +158,5 @@ class CMASolver(Solver):
                     min_dist = delta_dist
                     min_delta = delta
         
-        return min_delta, min_dist
+        x0 = logger[tuple(min_delta)] if min_delta is not None else None
+        return min_delta, min_dist, x0

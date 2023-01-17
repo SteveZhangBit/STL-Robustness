@@ -24,12 +24,12 @@ from datetime import datetime
 
 # CMA evalutor
 start = datetime.now()
-sys_eval = CMASystemEvaluator(0.4, phi, {'timeout': 1, 'episode_len': 10, 'evals': 50, 'restarts': 2})
+sys_eval = CMASystemEvaluator(0.4, phi, {'timeout': 1, 'episode_len': 200, 'evals': 50, 'restarts': 2})
 sys_eval.eval_sys(env.delta_0, prob)
 print("Time:", datetime.now() - start)
 
 # Expectation evaluator
 start = datetime.now()
-sys_eval = ExpectationSysEvaluator(phi, {'timeout': 1, 'episode_len': 10, 'evals': 50, 'restarts': 2})
+sys_eval = ExpectationSysEvaluator(phi, {'timeout': 1, 'episode_len': 200, 'evals': 50, 'restarts': 2})
 sys_eval.eval_sys(env.delta_0, prob)
 print("Time:", datetime.now() - start)

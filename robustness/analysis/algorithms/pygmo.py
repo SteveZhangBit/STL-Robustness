@@ -8,10 +8,12 @@ class MOMinDev:
     def __init__(self, problem: Problem, sys_evaluator: SystemEvaluator):
         self.problem = problem
         self.sys_evaluator = sys_evaluator
+        self.logger = {}
     
     def fitness(self, delta):
         objective = self.problem.dist.eval_dist(delta)
-        stl = self.sys_evaluator.eval_sys(delta, self.problem)[0]
+        stl, x0 = self.sys_evaluator.eval_sys(delta, self.problem)
+        self.logger[tuple(delta)] = x0
         return [objective, stl]
 
     def get_bounds(self):
@@ -25,11 +27,16 @@ class MOMinDev:
 class NSGA2Solver(Solver):
     def __init__(self, gen, popsize, sys_evaluator: SystemEvaluator, opts=None):
         super().__init__(sys_evaluator, opts)
+        del self._options['restarts']
+        del self._options['evals']
+        self._options['gen'] = gen
+        self._options['popsize'] = popsize
         self.gen = gen
         self.popsize = popsize
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
-        p = pg.problem(MOMinDev(problem, self.sys_evaluator))
+    def min_unsafe_deviation(self, problem: Problem, boundary=None):
+        mo = MOMinDev(problem, self.sys_evaluator)
+        p = pg.problem(mo)
         algo = pg.algorithm(pg.nsga2(gen=self.gen, m=0.1))
         pop = pg.population(p, size=self.popsize)
 
@@ -39,23 +46,29 @@ class NSGA2Solver(Solver):
         if feasible.sum() == 0:
             min_dist = np.inf
             min_delta = None
+            x0 = None
         else:
             fits, vectors = fits[feasible], vectors[feasible]
             min_idx = fits[:, 0].argmin()
             min_dist = fits[min_idx, 0]
             min_delta = vectors[min_idx]
+            # FIXME: pygmo is not able to log the results
+            # because it compiled to a c++ program
+            x0 = None
         
-        return min_delta, min_dist
+        return min_delta, min_dist, x0
 
 
 class ConstrainedMinDev:
     def __init__(self, problem: Problem, sys_evaluator: SystemEvaluator):
         self.problem = problem
         self.sys_evaluator = sys_evaluator
+        self.logger = {}
     
     def fitness(self, delta):
         objective = self.problem.dist.eval_dist(delta)
-        stl = self.sys_evaluator.eval_sys(delta, self.problem)[0]
+        stl, x0 = self.sys_evaluator.eval_sys(delta, self.problem)
+        self.logger[tuple(delta)] = x0
         return [objective, stl]
 
     def get_bounds(self):
@@ -73,13 +86,20 @@ class ConstrainedMinDev:
 class GACO(Solver):
     def __init__(self, gen, popsize, sys_evaluator: SystemEvaluator, opts=None):
         super().__init__(sys_evaluator, opts)
+        del self._options['restarts']
+        del self._options['evals']
+        self._options['gen'] = gen
+        self._options['popsize'] = popsize
         self.gen = gen
         self.popsize = popsize
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
-        p = pg.problem(ConstrainedMinDev(problem, self.sys_evaluator))
+    def min_unsafe_deviation(self, problem: Problem, boundary=None):
+        c = ConstrainedMinDev(problem, self.sys_evaluator)
+        p = pg.problem(c)
         algo = pg.algorithm(pg.gaco(gen=self.gen, ker=self.popsize))
         pop = pg.population(p, size=self.popsize)
 
         pop = algo.evolve(pop)
-        return pop.champion_x, pop.champion_f[0]
+        # FIXME: pygmo is not able to log the results
+        # because it compiled to a c++ program
+        return pop.champion_x, pop.champion_f[0], None
