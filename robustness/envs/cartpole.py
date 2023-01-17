@@ -4,7 +4,7 @@ import numpy as np
 import signal_tl as stl
 from gym.envs.classic_control import CartPoleEnv
 
-from robustness.analysis.stl import STLEvaluator
+from robustness.analysis.stl import STLEvaluator, STLEvaluator2
 from robustness.analysis.utils import normalize
 from robustness.envs import DeviatableEnv
 
@@ -85,3 +85,18 @@ class SafetyProp(STLEvaluator):
                 time_index
             )
         }
+
+
+class SafetyProp2(STLEvaluator2):
+    def __init__(self):
+        obs_space = ParamCartPoleEnv().observation_space
+        self.pos_range = np.asarray([obs_space.low[0], obs_space.high[0]])
+        self.angle_range = np.asarray([obs_space.low[2], obs_space.high[2]])
+
+        self.pos_threshold = normalize(2.4, self.pos_range)
+        self.angle_threshold = normalize(12 * 2 * np.pi / 360, self.angle_range)
+
+    def eval_one_timepoint(self, obs):
+        pos = normalize(obs[0], self.pos_range)
+        angle = normalize(obs[2], self.angle_range)
+        return np.min((self.pos_threshold - pos, self.angle_threshold - angle))
