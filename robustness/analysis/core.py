@@ -9,6 +9,7 @@ class DistanceEvaluator:
         self.env = env
     
     def eval_dist(self, delta):
+        '''Return a real value of the distance measurement.'''
         raise NotImplementedError()
 
 
@@ -53,6 +54,7 @@ class SystemEvaluator:
         return self._options.copy()
 
     def eval_sys(self, delta, problem: Problem):
+        '''Return a tuple of <result, x0?>'''
         raise NotImplementedError()
     
     def _eval_trace(self, x0, env, agent):
@@ -93,8 +95,10 @@ class Solver:
     def options(self):
         return self._options.copy()
 
-    def any_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
+    def any_unsafe_deviation(self, problem: Problem, boundary=None):
+        '''Return a tuple of <delta?, dist?, x0?>'''
         raise NotImplementedError()
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
+    def min_unsafe_deviation(self, problem: Problem, boundary=None):
+        '''Return a tuple of <min_delta?, min_dist?, x0?>'''
         raise NotImplementedError()

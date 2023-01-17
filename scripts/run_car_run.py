@@ -11,7 +11,6 @@ from robustness.analysis.algorithms import (CMASolver, CMASystemEvaluator,
 from robustness.analysis.utils import L2Norm, scale
 from robustness.envs.car_run import DevCarRun, SafetyProp
 from robustness.evaluation import Evaluator, Experiment
-from robustness.evaluation.logger import Logger
 from robustness.evaluation.utils import boxplot
 
 os.makedirs('gifs/car-run-ppo', exist_ok=True)

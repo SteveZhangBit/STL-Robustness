@@ -20,11 +20,11 @@ class Evaluator:
         print('System evaluation options:')
         print(solver.sys_evaluator.options())
     
-    def any_violation(self, boundary=None, logger=None):
-        return self.solver.any_unsafe_deviation(self.problem, boundary, logger=logger)
+    def any_violation(self, boundary=None):
+        return self.solver.any_unsafe_deviation(self.problem, boundary)
     
-    def min_violation(self, boundary=None, logger=None):
-        return self.solver.min_unsafe_deviation(self.problem, boundary, logger=logger)
+    def min_violation(self, boundary=None):
+        return self.solver.min_unsafe_deviation(self.problem, boundary)
 
     def visualize_violation(self, delta, x0=None, gif=None, **kwargs):
         env, _ = self.problem.env.instantiate(delta, **kwargs)

@@ -6,7 +6,7 @@ from robustness.analysis import *
 
 
 class ExpectationSysEvaluator(SystemEvaluator):
-    def eval_sys(self, delta, problem: Problem, logger=None):
+    def eval_sys(self, delta, problem: Problem):
         restarts = self._options['restarts']
         timeout = self._options['timeout'] * (1 + restarts)
         max_evals = self._options['evals'] * (1 + restarts)
@@ -28,7 +28,7 @@ class ExpectationSysEvaluator(SystemEvaluator):
 
 
 class RandomSolver(Solver):
-    def any_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
+    def any_unsafe_deviation(self, problem: Problem, boundary=None):
         dist = np.inf
         delta = None
 
@@ -48,9 +48,9 @@ class RandomSolver(Solver):
                 if (datetime.now() - start).total_seconds() > timeout * 60:
                     break
         
-        return delta, dist
+        return delta, dist, None
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None, logger=None):
+    def min_unsafe_deviation(self, problem: Problem, boundary=None):
         min_dist = np.inf
         min_delta = None
 
@@ -71,4 +71,4 @@ class RandomSolver(Solver):
                 if (datetime.now() - start).total_seconds() > timeout * 60:
                     break
         
-        return min_delta, min_dist
+        return min_delta, min_dist, None
