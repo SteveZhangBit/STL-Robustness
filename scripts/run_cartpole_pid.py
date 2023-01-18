@@ -9,7 +9,7 @@ from robustness.analysis.algorithms import (CMASolver, CMASystemEvaluator,
                                             ExpectationSysEvaluator,
                                             RandomSolver)
 from robustness.analysis.utils import L2Norm, normalize
-from robustness.envs.cartpole import DevCartPole, SafetyProp
+from robustness.envs.cartpole import DevCartPole, SafetyProp, SafetyProp2
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
 
@@ -58,13 +58,44 @@ evaluator2 = Evaluator(prob, random_solver)
 experiment2 = Experiment(evaluator2)
 data2 = experiment2.run_diff_max_samples('Random', samples, out_dir='data/cartpole-pid/random')
 
+# Use STL2 Evaluator
+phi = SafetyProp2()
+
+# Create problem and solver
+prob = Problem(env, agent, phi, L2Norm(env))
+sys_eval = CMASystemEvaluator(0.4, phi, {'timeout': 1, 'episode_len': 200})
+solver = CMASolver(0.2, sys_eval)
+evaluator = Evaluator(prob, solver)
+experiment = Experiment(evaluator)
+data3 = experiment.run_diff_max_samples('STL2', samples, out_dir='data/cartpole-pid/stl2')
+idx = np.argmin(data3['min_dist'])
+plt.figure()
+evaluator.heatmap(
+    masses, forces, 25, 25,
+    x_name="Mass", y_name="Force", z_name="System Evaluation $\Gamma$",
+    out_dir='data/cartpole-pid',
+    boundary=data3['min_dist'].iat[idx],
+    vmax=0.2
+)
+min_delta = normalize(data3['min_delta'].iat[idx], env.get_dev_bounds())
+plt.scatter(min_delta[0]*25, min_delta[1]*25, color='yellow')
+plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % data3['min_dist'].iat[idx])
+plt.savefig('gifs/cartpole-pid/fig-robustness-stl2.png', bbox_inches='tight')
+
 plt.figure()
 plt.xlabel('Number of samples')
 plt.ylabel('Minimum distance')
-boxplot([[d['min_dist'] for d in data1], [d['min_dist'] for d in data2]], ['red', 'blue'], samples * (1 + solver.options()['restarts']),
-        ['CMA', 'Random'])
+boxplot(
+    [
+        [data1['min_dist'].loc[x] for x in samples],
+        [data2['min_dist'].loc[x] for x in samples],
+        [data3['min_dist'].loc[x] for x in samples],
+    ],
+    ['red', 'blue', 'green'],
+    samples * (1 + solver.options()['restarts']),
+    ['CMA', 'Random', 'CMA2']
+)
 plt.savefig('gifs/cartpole-pid/fig-boxplot.png', bbox_inches='tight')
-# plt.show()
 
 # Use expection evaluator
 # sys_eval3 = ExpectationSysEvaluator(

@@ -10,7 +10,7 @@ from gym import error, spaces
 from gym.error import DependencyNotInstalled
 from gym.utils import EzPickle, colorize, seeding
 
-from robustness.analysis.stl import STLEvaluator
+from robustness.analysis.stl import STLEvaluator, STLEvaluator2
 from robustness.analysis.utils import normalize
 from robustness.envs import DeviatableEnv
 
@@ -778,3 +778,20 @@ class SafetyProp(STLEvaluator):
                 time_index
             )
         }
+
+
+class SafetyProp2(STLEvaluator2):
+    def __init__(self):
+        env = LunarLander(enable_wind=True, continuous=True)
+        obs_space = env.observation_space
+        self.angle_range = np.asarray([obs_space.low[4], obs_space.high[4]])
+        self.x_range = np.asarray([obs_space.low[0], obs_space.high[0]])
+        self.y_range = np.asarray([obs_space.low[1], obs_space.high[1]])
+
+        self.angle_threshold = normalize(45 * 2 * np.pi / 360, self.angle_range)
+    
+    def eval_one_timepoint(self, obs):
+        angle = normalize(np.abs(obs[4]), self.angle_range)
+        delta_x = normalize(np.abs(obs[0]), self.x_range) -\
+                    normalize(np.abs(0.6 * obs[1]), self.y_range)
+        return np.min((self.angle_threshold - angle, 0.1 - delta_x))
