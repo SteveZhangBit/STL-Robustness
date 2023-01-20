@@ -4,7 +4,7 @@ from bullet_safety_gym.envs.tasks import angle2pos
 from rsrl.evaluator import Evaluator
 from rsrl.util.run_util import setup_eval_configs
 
-from robustness.analysis.stl import STLEvaluator
+from robustness.analysis.stl import STLEvaluator, STLEvaluator2
 from robustness.envs import DeviatableEnv
 
 
@@ -73,3 +73,9 @@ class SafetyProp(STLEvaluator):
         return {
             'x': stl.Signal(np.abs(record[:, 0]), time_index)
         }
+
+
+class SafetyProp2(STLEvaluator2):
+    def eval_one_timepoint(self, obs):
+        x = np.abs(obs[0])
+        return 0.7 - x
