@@ -8,7 +8,7 @@ from robustness.analysis import Problem
 from robustness.analysis.algorithms import (CMASolver, CMASystemEvaluator,
                                             RandomSolver, ExpectationSysEvaluator)
 from robustness.analysis.utils import L2Norm, normalize
-from robustness.envs.lunar_lander import DevLunarLander, SafetyProp
+from robustness.envs.lunar_lander import DevLunarLander, SafetyProp, SafetyProp2
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
 
@@ -63,12 +63,45 @@ evaluator2 = Evaluator(prob, random_solver)
 experiment2 = Experiment(evaluator2)
 data2 = experiment2.run_diff_max_samples('Random', samples, out_dir='data/lunar-lander-ppo/random')
 
-# plt.figure()
-# plt.xlabel('Number of samples')
-# plt.ylabel('Minimum distance')
-# boxplot([data1, data2], ['red', 'blue'], samples * (1 + solver.options()['restarts']),
-#         ['CMA', 'Random'])
-# plt.savefig('gifs/lunar-lander-ppo/fig-boxplot.png', bbox_inches='tight')
+# Use STL2 Evaluator
+phi = SafetyProp2()
+prob = Problem(env, agent, phi, L2Norm(env))
+sys_eval = CMASystemEvaluator(
+    0.4, phi, 
+    {'timeout': 1, 'restarts': 0, 'episode_len': 300, 'evals': 40}
+)
+solver = CMASolver(0.2, sys_eval)
+evaluator = Evaluator(prob, solver)
+experiment = Experiment(evaluator)
+data3 = experiment.run_diff_max_samples('STL2', samples, out_dir='data/lunar-lander-ppo/stl2')
+idx = np.argmin(data3['min_dist'])
+plt.figure()
+evaluator.heatmap(
+    winds, turbulences, 25, 25,
+    x_name="Wind", y_name="Turbulence", z_name="System Evaluation $\Gamma$",
+    out_dir='data/lunar-lander-ppo',
+    boundary=data3['min_dist'].iat[idx],
+    vmax=0.1, vmin=-0.4
+)
+min_delta = normalize(data3['min_delta'].iat[idx], env.get_dev_bounds())
+plt.scatter(min_delta[0]*25, min_delta[1]*25, color='yellow')
+plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % data3['min_dist'].iat[idx])
+plt.savefig('gifs/lunar-lander-ppo/fig-robustness-stl2.png', bbox_inches='tight')
+
+plt.figure()
+plt.xlabel('Number of samples')
+plt.ylabel('Minimum distance')
+boxplot(
+    [
+        [data1['min_dist'].loc[x] for x in samples],
+        [data2['min_dist'].loc[x] for x in samples],
+        [data3['min_dist'].loc[x] for x in samples],
+    ],
+    ['red', 'blue', 'green'],
+    samples * (1 + solver.options()['restarts']),
+    ['CMA', 'Random', 'CMA2']
+)
+plt.savefig('gifs/lunar-lander-ppo/fig-boxplot.png', bbox_inches='tight')
 # plt.show()
 
 # Use expectation evaluator
