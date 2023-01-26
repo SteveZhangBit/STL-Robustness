@@ -73,9 +73,8 @@ plt.figure()
 evaluator.heatmap(
     masses, forces, 25, 25,
     x_name="Mass", y_name="Force", z_name="System Evaluation $\Gamma$",
-    out_dir='data/cartpole-pid',
+    out_dir='data/cartpole-pid/stl2',
     boundary=data3['min_dist'].iat[idx],
-    vmax=0.2
 )
 min_delta = normalize(data3['min_delta'].iat[idx], env.get_dev_bounds())
 plt.scatter(min_delta[0]*25, min_delta[1]*25, color='yellow')

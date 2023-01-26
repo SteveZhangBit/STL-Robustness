@@ -79,9 +79,9 @@ plt.figure()
 evaluator.heatmap(
     winds, turbulences, 25, 25,
     x_name="Wind", y_name="Turbulence", z_name="System Evaluation $\Gamma$",
-    out_dir='data/lunar-lander-ppo',
+    out_dir='data/lunar-lander-ppo/stl2',
     boundary=data3['min_dist'].iat[idx],
-    vmax=0.1, vmin=-0.4
+    # vmax=0.1, vmin=-0.4
 )
 min_delta = normalize(data3['min_delta'].iat[idx], env.get_dev_bounds())
 plt.scatter(min_delta[0]*25, min_delta[1]*25, color='yellow')
