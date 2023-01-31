@@ -65,6 +65,7 @@ evaluator2 = Evaluator(prob, random_solver)
 experiment2 = Experiment(evaluator2)
 data2 = experiment2.run_diff_max_samples('Random', samples, out_dir='data/lunar-lander-lqr/random')
 
+# Use STL2 Evaluator
 phi = SafetyProp2()
 prob = Problem(env, agent, phi, L2Norm(env))
 sys_eval = CMASystemEvaluator(
@@ -80,9 +81,9 @@ plt.figure()
 evaluator.heatmap(
     winds, turbulences, 25, 25,
     x_name="Wind", y_name="Turbulence", z_name="System Evaluation $\Gamma$",
-    out_dir='data/lunar-lander-lqr',
+    out_dir='data/lunar-lander-lqr/stl2',
     boundary=data3['min_dist'].iat[idx],
-    vmax=0.1, vmin=-0.4
+    # vmax=0.1, vmin=-0.4
 )
 min_delta = normalize(data3['min_delta'].iat[idx], env.get_dev_bounds())
 plt.scatter(min_delta[0]*25, min_delta[1]*25, color='yellow')
