@@ -3,7 +3,7 @@ import signal_tl as stl
 from rsrl.evaluator import Evaluator
 from rsrl.util.run_util import setup_eval_configs
 
-from robustness.analysis.stl import STLEvaluator
+from robustness.analysis.stl import STLEvaluator, STLEvaluator2
 from robustness.envs import DeviatableEnv
 
 
@@ -73,3 +73,10 @@ class SafetyProp(STLEvaluator):
             'y': stl.Signal(np.abs(record[:, 1]), time_index),
             'vel': stl.Signal(np.linalg.norm(record[:, 2:4], axis=1), time_index)
         }
+
+
+class SafetyProp2(STLEvaluator2):
+    def eval_one_timepoint(self, obs):
+        y = np.abs(obs[1])
+        vel = np.linalg.norm(obs[2:4])
+        return np.min((0.25 - y, 1.5 - vel))

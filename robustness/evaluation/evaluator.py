@@ -149,7 +149,12 @@ class EpisodeVisualizer:
 
     def _init_fig(self):
         self.fig, self.ax = plt.subplots()
-        self.ax.set_title(self.env.spec.id)
+        self.ax.set_title(
+            f"{self.env.spec.id}\n" +
+            f"Step: 0 | Reward: 0.000 | Done: False\n" +
+            f"{self.phi}: 0.000",
+            {'fontsize': 13}
+        )
         self.ax.set_axis_off()
         self.img = self.ax.imshow(self.env.render(mode='rgb_array'))
     
@@ -158,7 +163,7 @@ class EpisodeVisualizer:
             f"{self.env.spec.id}\n" +
             f"Step: {step} | Reward: {reward:.3f} | Done: {done}\n" +
             f"{self.phi}: {phi_val:.3f}",
-            {'color': 'r' if done or phi_val < 0 else 'k'}
+            {'color': 'r' if done or phi_val < 0 else 'k', 'fontsize': 13}
         )
         self.img.set_data(self.env.render(mode='rgb_array'))
         self.fig.canvas.draw()
