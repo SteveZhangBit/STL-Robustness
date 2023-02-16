@@ -5,10 +5,11 @@ import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
+from statsmodels.stats.proportion import proportion_confint
 
 from robustness.agents import Agent
 from robustness.analysis import Problem, Solver, TraceEvaluator
-from robustness.analysis.utils import normalize
+from robustness.analysis.utils import normalize, scale
 
 
 class Evaluator:
@@ -25,6 +26,28 @@ class Evaluator:
     
     def min_violation(self, boundary=None):
         return self.solver.min_unsafe_deviation(self.problem, boundary)
+    
+    def certified_min_violation(self, n=100, alpha=0.05):
+        certificated = False
+        min_delta, min_dist, min_x0 = None, np.inf, None
+        while not certificated:
+            delta, dist, x0 = self.min_violation()
+            print('CMA search min deviation:', delta, dist)
+
+            if dist < min_dist:
+                min_delta, min_dist, min_x0 = delta, dist, x0
+
+            lower_bound, violation, violated_x0 = self.certify(min_dist, n, alpha)
+            print('Certify:', lower_bound, violation)
+
+            if violation is None:
+                certificated = True
+            else:
+                violated_dist = self.problem.dist.eval_dist(violation)
+                self.solver.sigma = violated_dist / 2
+                min_delta, min_dist, min_x0 = violation, violated_dist, violated_x0
+
+        return min_delta, min_dist, min_x0
 
     def visualize_violation(self, delta, x0=None, gif=None, **kwargs):
         env, _ = self.problem.env.instantiate(delta, **kwargs)
@@ -136,6 +159,35 @@ class Evaluator:
 
         plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
         return ax, X, Y, Z
+    
+    def certify(self, dist, n=100, alpha=0.05):
+        '''
+        Return <lower bound?, violated delta?, violated x0?>.
+        '''
+        bounds = self.problem.env.get_dev_bounds()
+        center = normalize(self.problem.env.get_delta_0(), bounds)
+        low, high = np.clip(center - dist, 0.0, 1.0), np.clip(center + dist, 0.0, 1.0)
+
+        samples = []
+        values = []
+        x0s = []
+        c = 0
+        while c < n:
+            delta = scale(np.random.uniform(low, high), bounds)
+            if self.problem.dist.eval_dist(delta) > dist:
+                continue
+
+            c += 1
+            samples.append(delta)
+            v, x0 = self.solver.sys_evaluator.eval_sys(delta, self.problem)
+            values.append(v)
+            x0s.append(x0)
+        
+        values = np.asarray(values)
+        idx = values.argmin()
+        violation, violated_x0 = (samples[idx], x0s[idx]) if values[idx] < 0 else (None, None)
+        k = np.sum(values >= 0)
+        return proportion_confint(k, n, alpha * 2, method='beta')[0], violation, violated_x0
 
 
 class EpisodeVisualizer:
