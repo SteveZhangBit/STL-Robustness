@@ -76,6 +76,9 @@ class SafetyProp(STLEvaluator):
 
 
 class SafetyProp2(STLEvaluator2):
+    '''
+    Deprecated.
+    '''
     def eval_one_timepoint(self, obs):
         y = np.abs(obs[1])
         vel = np.linalg.norm(obs[2:4])

@@ -76,6 +76,9 @@ class SafetyProp(STLEvaluator):
 
 
 class SafetyProp2(STLEvaluator2):
+    '''
+    Deprecated.
+    '''
     def eval_one_timepoint(self, obs):
         x = np.abs(obs[0])
         return 0.7 - x

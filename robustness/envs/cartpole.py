@@ -88,6 +88,9 @@ class SafetyProp(STLEvaluator):
 
 
 class SafetyProp2(STLEvaluator2):
+    '''
+    Deprecated.
+    '''
     def __init__(self):
         obs_space = ParamCartPoleEnv().observation_space
         self.pos_range = np.asarray([obs_space.low[0], obs_space.high[0]])

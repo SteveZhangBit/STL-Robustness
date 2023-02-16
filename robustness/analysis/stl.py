@@ -41,6 +41,10 @@ class STLEvaluator(TraceEvaluator):
 
 
 class STLEvaluator2(TraceEvaluator):
+    '''
+    Deprecated. This is used for our custom STL metric that cumulates the positive robustness
+    and negative robustness for safety properties only.
+    '''
     def eval_trace(self, obs_record, reward_record):
         rob = np.array([self.eval_one_timepoint(x) for x in obs_record])
         positive = rob[rob > 0].sum()

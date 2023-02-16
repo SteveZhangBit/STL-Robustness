@@ -781,6 +781,9 @@ class SafetyProp(STLEvaluator):
 
 
 class SafetyProp2(STLEvaluator2):
+    '''
+    Deprecated.
+    '''
     def __init__(self):
         env = LunarLander(enable_wind=True, continuous=True)
         obs_space = env.observation_space
