@@ -31,4 +31,16 @@ sys_eval = CMASystemEvaluator(
 )
 solver = CMASolver(0.2, sys_eval, {'restarts': 0, 'evals': 50})
 evaluator = Evaluator(prob, solver)
-print('Certified minimum deviation:', evaluator.certified_min_violation())
+# print('Certified minimum deviation:', evaluator.certified_min_violation())
+radius = evaluator.smooth_boundary(0.2, 100, 0.05)
+
+plt.figure()
+evaluator.heatmap(
+    winds, turbulences, 25, 25,
+    x_name="Wind", y_name="Turbulence", z_name="System Evaluation $\Gamma$",
+    out_dir='data/lunar-lander-ppo',
+    boundary=radius,
+    vmax=0.1, vmin=-0.4
+)
+plt.title('Smooth Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % radius)
+plt.savefig('gifs/lunar-lander-ppo/fig-smooth-robustness.png', bbox_inches='tight')

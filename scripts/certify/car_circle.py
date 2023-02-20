@@ -13,6 +13,12 @@ from robustness.envs.car_circle import DevCarCircle, SafetyProp, SafetyProp2
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
 
+os.makedirs('gifs/car-circle-ppo', exist_ok=True)
+plt.rc('axes', labelsize=17, titlesize=17)
+plt.rc('xtick', labelsize=14)
+plt.rc('ytick', labelsize=14)
+plt.rc('legend', fontsize=14)
+
 load_dir = 'models/car_circle_ppo_vanilla/model_save/model.pt'
 speed = [5.0, 60.0]
 steering = [0.2, 0.8]
@@ -27,4 +33,15 @@ sys_eval = CMASystemEvaluator(
 )
 solver = CMASolver(0.1, sys_eval, {'restarts': 0, 'evals': 50})
 evaluator = Evaluator(prob, solver)
-print('Certified minimum deviation:', evaluator.certified_min_violation())
+# print('Certified minimum deviation:', evaluator.certified_min_violation())
+radius = evaluator.smooth_boundary(0.2, 100, 0.05)
+
+plt.figure()
+evaluator.heatmap(
+    speed, steering, 25, 25,
+    x_name="Speed Multiplier", y_name="Steering Multiplier", z_name="System Evaluation $\Gamma$",
+    out_dir='data/car-circle-ppo',
+    boundary=radius,
+)
+plt.title('Smooth Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % radius)
+plt.savefig('gifs/car-circle-ppo/fig-smooth-robustness.png', bbox_inches='tight')

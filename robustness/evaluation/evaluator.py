@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
 from statsmodels.stats.proportion import proportion_confint
+from scipy.stats import norm
 
 from robustness.agents import Agent
 from robustness.analysis import Problem, Solver, TraceEvaluator
@@ -48,6 +49,18 @@ class Evaluator:
                 min_delta, min_dist, min_x0 = violation, violated_dist, violated_x0
 
         return min_delta, min_dist, min_x0
+    
+    def smooth_boundary(self, sigma, n, alpha):
+        bounds = self.problem.env.get_dev_bounds()
+        center = normalize(self.problem.env.get_delta_0(), bounds)
+        samples = np.random.default_rng().normal(center, sigma, (n, len(center)))
+        # FIXME: should I clip?
+        samples = np.clip(samples, 0.0, 1.0)
+        values = np.asarray([self.solver.sys_evaluator.eval_sys(scale(delta, bounds), self.problem)[0] for delta in samples])
+        count = np.sum(values >= 0.0)
+
+        lower_bound = proportion_confint(count, n, alpha=2 * alpha, method="beta")[0]
+        return sigma * norm.ppf(lower_bound) if lower_bound > 0.5 else None
 
     def visualize_violation(self, delta, x0=None, gif=None, **kwargs):
         env, _ = self.problem.env.instantiate(delta, **kwargs)
