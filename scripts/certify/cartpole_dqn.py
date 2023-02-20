@@ -31,4 +31,16 @@ prob = Problem(env, agent, phi, L2Norm(env))
 sys_eval = CMASystemEvaluator(0.4, phi, {'timeout': 1, 'episode_len': 200})
 solver = CMASolver(0.2, sys_eval, {'restarts': 0, 'evals': 50})
 evaluator = Evaluator(prob, solver)
-print('Certified minimum deviation:', evaluator.certified_min_violation())
+# print('Certified minimum deviation:', evaluator.certified_min_violation())
+radius = evaluator.smooth_boundary(0.2, 100, 0.05)
+
+plt.figure()
+evaluator.heatmap(
+    masses, forces, 25, 25,
+    x_name="Mass", y_name="Force", z_name="System Evaluation $\Gamma$",
+    out_dir='data/cartpole-dqn',
+    boundary=radius,
+    vmax=0.2
+)
+plt.title('Smooth Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % radius)
+plt.savefig('gifs/cartpole-dqn/fig-smooth-robustness.png', bbox_inches='tight')
