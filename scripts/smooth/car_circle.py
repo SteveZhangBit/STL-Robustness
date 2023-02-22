@@ -20,7 +20,7 @@ plt.rc('ytick', labelsize=14)
 plt.rc('legend', fontsize=14)
 
 load_dir = 'models/car_circle_ppo_vanilla/model_save/model.pt'
-speed = [5.0, 60.0]
+speed = [5.0, 35.0]
 steering = [0.2, 0.8]
 env = DevCarCircle(load_dir, speed, steering)
 agent = PPOVanilla(load_dir)
@@ -34,7 +34,7 @@ sys_eval = CMASystemEvaluator(
 solver = CMASolver(0.1, sys_eval, {'restarts': 0, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 # print('Certified minimum deviation:', evaluator.certified_min_violation())
-radius = evaluator.smooth_boundary(0.2, 100, 0.05)
+radius = evaluator.smooth_boundary(0.1, 500, 0.05)
 
 plt.figure()
 evaluator.heatmap(

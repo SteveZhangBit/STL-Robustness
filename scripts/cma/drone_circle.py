@@ -27,32 +27,32 @@ sys_eval = CMASystemEvaluator(
 solver = CMASolver(0.1, sys_eval)
 evaluator = Evaluator(prob, solver)
 
-os.makedirs('gifs/drone-circle-ppo', exist_ok=True)
+os.makedirs('old_gifs/drone-circle-ppo', exist_ok=True)
 experiment = Experiment(evaluator)
-# data1, _ = experiment.run_diff_max_samples('CMA', np.arange(25, 126, 25), out_dir='data/drone-circle-ppo/cma')
+# data1, _ = experiment.run_diff_max_samples('CMA', np.arange(25, 126, 25), out_dir='old_data/drone-circle-ppo/cma')
 plt.rc('axes', labelsize=12, titlesize=13)
 plt.figure()
 evaluator.heatmap(
     air_density, mass, 25, 25,
     x_name="Air Density", y_name="Mass", z_name="System Evaluation $\Gamma$",
-    out_dir='data/drone-circle-ppo',
+    out_dir='old_data/drone-circle-ppo',
     # boundary=np.min(data1),
 )
 # plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % np.min(data1))
-plt.savefig('gifs/drone-circle-ppo/robustness.png', bbox_inches='tight')
+plt.savefig('old_gifs/drone-circle-ppo/robustness.png', bbox_inches='tight')
 
 # Use Random Solver
 # random_solver = RandomSolver(sys_eval)
 # evaluator2 = Evaluator(prob, random_solver)
 # experiment2 = Experiment(evaluator2)
-# data2, _ = experiment2.run_diff_max_samples('Random', np.arange(25, 126, 25), out_dir='data/drone-circle-ppo/random')
+# data2, _ = experiment2.run_diff_max_samples('Random', np.arange(25, 126, 25), out_dir='old_data/drone-circle-ppo/random')
 
 # plt.figure()
 # plt.xlabel('Number of samples')
 # plt.ylabel('Minimum distance')
 # boxplot([data1, data2], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.options()['restarts']),
 #         ['CMA', 'Random'])
-# plt.savefig('gifs/drone-circle-ppo/sample-boxplot.png', bbox_inches='tight')
+# plt.savefig('old_gifs/drone-circle-ppo/sample-boxplot.png', bbox_inches='tight')
 
 # sys_eval3 = ExpectationSysEvaluator(
 #     phi,
@@ -61,20 +61,20 @@ plt.savefig('gifs/drone-circle-ppo/robustness.png', bbox_inches='tight')
 # solver3 = CMASolver(0.1, sys_eval3)
 # evaluator3 = Evaluator(prob, solver3)
 # experiment3 = Experiment(evaluator3)
-# data3, _ = experiment3.run_diff_max_samples('Expc', np.arange(25, 126, 25), out_dir='data/drone-circle-ppo/expc')
+# data3, _ = experiment3.run_diff_max_samples('Expc', np.arange(25, 126, 25), out_dir='old_data/drone-circle-ppo/expc')
 # plt.figure()
 # evaluator3.heatmap(
 #     air_density, mass, 25, 25,
 #     x_name="Air Density", y_name="Mass", z_name="System Evaluation $\Gamma$",
-#     out_dir='data/drone-circle-ppo/expc',
+#     out_dir='old_data/drone-circle-ppo/expc',
 #     boundary=np.min(data3),
 # )
 # plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % np.min(data3))
-# plt.savefig('gifs/drone-circle-ppo/robustness-expc.png', bbox_inches='tight')
+# plt.savefig('old_gifs/drone-circle-ppo/robustness-expc.png', bbox_inches='tight')
 
 # plt.figure()
 # plt.xlabel('Number of samples')
 # plt.ylabel('Minimum distance')
 # boxplot([data1, data3], ['red', 'blue'], np.arange(25, 126, 25) * (1 + solver.options()['restarts']),
 #         ['CMA', 'CMA-Expc'])
-# plt.savefig('gifs/drone-circle-ppo/sample-boxplot-expc.png', bbox_inches='tight')
+# plt.savefig('old_gifs/drone-circle-ppo/sample-boxplot-expc.png', bbox_inches='tight')

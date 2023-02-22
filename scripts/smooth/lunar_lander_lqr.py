@@ -19,9 +19,9 @@ plt.rc('xtick', labelsize=14)
 plt.rc('ytick', labelsize=14)
 plt.rc('legend', fontsize=14)
 
-winds = [0.0, 20.0]
-turbulences = [0.0, 2.0]
-env = DevLunarLander(winds, turbulences, (0.0, 0.0))
+winds = [0.0, 10.0]
+turbulences = [0.0, 1.0]
+env = DevLunarLander(winds, turbulences, (5.0, 0.5))
 agent = LQR(FPS, VIEWPORT_H, VIEWPORT_W, SCALE)
 phi = SafetyProp()
 
@@ -33,7 +33,7 @@ sys_eval = CMASystemEvaluator(
 solver = CMASolver(0.2, sys_eval, {'restarts': 0, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 # print('Certified minimum deviation:', evaluator.certified_min_violation())
-radius = evaluator.smooth_boundary(0.2, 100, 0.05)
+radius = evaluator.smooth_boundary(0.1, 500, 0.05)
 
 plt.figure()
 evaluator.heatmap(
@@ -41,7 +41,7 @@ evaluator.heatmap(
     x_name="Wind", y_name="Turbulence", z_name="System Evaluation $\Gamma$",
     out_dir='data/lunar-lander-lqr',
     boundary=radius,
-    vmax=0.1, vmin=-0.4
+    # vmax=0.1, vmin=-0.4
 )
 plt.title('Smooth Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % radius)
 plt.savefig('gifs/lunar-lander-lqr/fig-smooth-robustness.png', bbox_inches='tight')
