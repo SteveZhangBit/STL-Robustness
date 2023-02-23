@@ -1,5 +1,7 @@
 import os
 import time
+import pickle
+import pandas as pd
 
 import imageio
 import matplotlib.pyplot as plt
@@ -50,17 +52,31 @@ class Evaluator:
 
         return min_delta, min_dist, min_x0
     
-    def smooth_boundary(self, sigma, n, alpha):
+    def smooth_boundary(self, sigma, n, alpha, k, out_dir):
         bounds = self.problem.env.get_dev_bounds()
         center = normalize(self.problem.env.get_delta_0(), bounds)
-        samples = np.random.default_rng().normal(center, sigma, (n, len(center)))
-        # FIXME: should I clip?
-        samples = np.clip(samples, 0.0, 1.0)
-        values = np.asarray([self.solver.sys_evaluator.eval_sys(scale(delta, bounds), self.problem)[0] for delta in samples])
-        count = np.sum(values >= 0.0)
 
+        file = os.path.join(out_dir, f'smooth-robustness-{sigma}-{n}.pickle')
+        if os.path.exists(file):
+            with open(file, 'rb') as f:
+                data = pickle.load(f)
+            samples = data['samples']
+            values = data['values']
+        else:
+            os.makedirs(out_dir, exist_ok=True)    
+            
+            samples = np.random.default_rng().normal(center, sigma, (n, len(center)))
+            # FIXME: should I clip?
+            samples = np.clip(samples, 0.0, 1.0)
+            values = np.asarray([self.solver.sys_evaluator.eval_sys(scale(delta, bounds), self.problem)[0] for delta in samples])
+            
+            data = {'samples': samples, 'values': values}
+            with open(file, 'wb') as f:
+                pickle.dump(data, f)
+        
+        count = np.sum(values >= 0.0)
         lower_bound = proportion_confint(count, n, alpha=2 * alpha, method="beta")[0]
-        return sigma * norm.ppf(lower_bound) if lower_bound > 0.5 else None
+        return sigma * (norm.ppf(lower_bound) - norm.ppf(k)) if lower_bound > k else 0.0
 
     def visualize_violation(self, delta, x0=None, gif=None, **kwargs):
         env, _ = self.problem.env.instantiate(delta, **kwargs)

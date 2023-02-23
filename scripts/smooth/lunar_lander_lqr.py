@@ -33,7 +33,7 @@ sys_eval = CMASystemEvaluator(
 solver = CMASolver(0.2, sys_eval, {'restarts': 0, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 # print('Certified minimum deviation:', evaluator.certified_min_violation())
-radius = evaluator.smooth_boundary(0.1, 500, 0.05)
+radius = evaluator.smooth_boundary(0.1, 1000, 0.05, 0.9, 'data/lunar-lander-lqr')
 
 plt.figure()
 evaluator.heatmap(
