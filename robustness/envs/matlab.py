@@ -12,6 +12,8 @@ class DevACC(DeviatableEnv):
     
     def instantiate(self, delta, agent):
         self.eng.workspace['name'] = f'ACC_{agent.type}_breach'
+        if agent.type == 'RL':
+            self.eng.workspace['agent'] = self.eng.load(agent.path)['agent']
         # the velocity and the position of lead car
         self.eng.workspace['x0_lead'] = delta[0]
         self.eng.workspace['v0_lead'] = delta[1]

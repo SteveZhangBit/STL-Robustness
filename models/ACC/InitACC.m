@@ -21,6 +21,8 @@ v0_ego = 20;
 % the acceleration is constrained to the range [-1,1] (m/s^2).
 amin_lead = -1;
 amax_lead = 1;
+% RL parameters
+use_MPC = 0;
 
 model = BreachSimulinkSystem(name);
 model.Sys.tspan = 0:Ts:T;
