@@ -3,3 +3,6 @@ outcmaes/
 **/.ipynb_checkpoints/
 *.egg-info
 **/slprj/
+*.slxc
+*.asv
+*.autosave

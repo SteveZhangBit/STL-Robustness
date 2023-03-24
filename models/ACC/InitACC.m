@@ -1,7 +1,7 @@
 T = 50;
 Ts = 0.1;
 % Specify the linear model for ego car.
-G_ego = tf(1,[0.5,1,0]);
+G_ego = tf(1, [0.5, 1, 0]);
 t_gap = 1.4;
 D_default = 10;
 % Specify the driver-set velocity in m/s.
@@ -13,14 +13,14 @@ vmin_ego = 0;
 amin_ego = -3;
 amax_ego = 2;
 % the velocity and the position of lead car
-% x0_lead = 70;
-% v0_lead = 40;
+x0_lead = 50;
+v0_lead = 25;
 % the velocity and the position of ego car
 x0_ego = 10;
 v0_ego = 20;
 % the acceleration is constrained to the range [-1,1] (m/s^2).
-amin_lead = -1;
-amax_lead = 1;
+% amin_lead = -1;
+% amax_lead = 1;
 % RL parameters
 use_MPC = 0;
 
