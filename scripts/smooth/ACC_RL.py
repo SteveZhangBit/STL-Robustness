@@ -36,8 +36,8 @@ evaluator = Evaluator(prob, solver)
 
 # print(solver.sys_evaluator.eval_sys(env.get_delta_0(), prob))
 
-# radius = evaluator.smooth_boundary(0.1, 100, 0.05, 0.9, 'data/ACC/RL')
-radius = 0.0
+radius = evaluator.smooth_boundary(0.1, 1000, 0.05, 0.9, 'data/ACC/RL')
+# radius = 0.0
 
 plt.figure()
 evaluator.heatmap(
