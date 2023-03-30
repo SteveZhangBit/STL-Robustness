@@ -1,3 +1,7 @@
+'''
+The run script for the ACC example with the traditional agent.
+'''
+
 import os
 import matplotlib.pyplot as plt
 

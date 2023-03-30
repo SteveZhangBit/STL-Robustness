@@ -28,4 +28,26 @@ class DevACC(DeviatableEnv):
 
 
 class DevLKA(DeviatableEnv):
-    pass
+    def __init__(self, eng, turn_pos1, turn_pos2, delta_0) -> None:
+        self.eng = eng
+        self.turn_pos1 = turn_pos1
+        self.turn_pos2 = turn_pos2
+        self.dev_bounds = np.array([turn_pos1, turn_pos2])
+        self.delta_0 = np.array(delta_0)
+    
+    def instantiate(self, delta, agent):
+        self.eng.workspace['name'] = f'LKA_{agent.type}_breach'
+        if agent.type == 'RL':
+            self.eng.workspace['agent'] = self.eng.load(agent.path)['agent']
+        else:
+            self.eng.workspace['agent'] = 0
+        self.eng.workspace['turn_pos1'] = delta[0]
+        self.eng.workspace['turn_pos2'] = delta[1]
+        self.eng.InitLKA(nargout=0)
+        return self.eng.workspace['model']
+
+    def get_dev_bounds(self):
+        return self.dev_bounds
+    
+    def get_delta_0(self):
+        return self.delta_0
