@@ -51,3 +51,29 @@ class DevLKA(DeviatableEnv):
     
     def get_delta_0(self):
         return self.delta_0
+
+
+class DevWTK(DeviatableEnv):
+    def __init__(self, eng, in_rates, out_rates, delta_0):
+        self.eng = eng
+        self.in_rates = in_rates
+        self.out_rates = out_rates
+        self.dev_bounds = np.array([in_rates, out_rates])
+        self.delta_0 = np.array(delta_0)
+    
+    def instantiate(self, delta, agent):
+        self.eng.workspace['name'] = f'WTK_{agent.type}_breach'
+        if agent.type == 'RL':
+            self.eng.workspace['agent'] = self.eng.load(agent.path)['agent']
+        else:
+            self.eng.workspace['agent'] = 0
+        self.eng.workspace['in_rate'] = delta[0]
+        self.eng.workspace['out_rate'] = delta[1]
+        self.eng.InitWTK(nargout=0)
+        return self.eng.workspace['model']
+    
+    def get_dev_bounds(self):
+        return self.dev_bounds
+    
+    def get_delta_0(self):
+        return self.delta_0

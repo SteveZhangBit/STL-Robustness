@@ -43,3 +43,9 @@ model = BreachSignalGen(sg);
 model.SetTime(0:Ts:T);
 model.SetParamRanges({'Vx', 'e1_initial','e2_initial'}, [12 18; -0.5 0.5; -0.1 0.1]);
 % model.SetParamRanges({'e1_initial','e2_initial'}, [-0.5 0.5; -0.1 0.1]);
+
+% pb = FalsificationProblem(model, STL_Formula('phi','alw (abs(lateral_deviation[t]) < 0.85)'));
+% pb.setup_solver('cmaes');
+% pb.max_obj_eval = 30;
+% pb.solve();
+% BreachSamplesPlot(pb.GetLog);

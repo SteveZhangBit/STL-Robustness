@@ -37,3 +37,9 @@ for cpi = 0:input_gen.cp-1
     in_lead_sig = strcat('in_lead_u', num2str(cpi));
     model.SetParamRanges({in_lead_sig}, [amin_lead amax_lead]);
 end
+
+% pb = FalsificationProblem(model, STL_Formula('phi','alw (d_rel[t] - t_gap * v_ego[t] >= D_default - 0.5)'));
+% pb.setup_solver('cmaes');
+% pb.max_obj_eval = 30;
+% pb.solve();
+% BreachSamplesPlot(pb.GetLog);
