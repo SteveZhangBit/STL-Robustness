@@ -30,7 +30,7 @@ eng.InitBreach(nargout=0)
 turn_pos1 = [10, 35]
 turn_pos2 = [40, 70]
 env = DevLKA(eng, turn_pos1, turn_pos2, (27.19, 56.46))
-agent = RLAgent('LKA_PPO_Agent_9_18.mat')
+agent = RLAgent('LKA_DDPG_Agent_9_2.mat')
 phi = BreachSTL('alw (abs(lateral_deviation[t]) < 0.85)')
 
 prob = Problem(env, agent, phi, L2Norm(env))
