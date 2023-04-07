@@ -77,3 +77,29 @@ class DevWTK(DeviatableEnv):
     
     def get_delta_0(self):
         return self.delta_0
+
+
+class DevAFC(DeviatableEnv):
+    def __init__(self, eng, MAF_sensor_tols, AF_sensor_tols, delta_0):
+        self.eng = eng
+        self.MAF_sensor_tols = MAF_sensor_tols
+        self.AF_sensor_tols = AF_sensor_tols
+        self.dev_bounds = np.array([MAF_sensor_tols, AF_sensor_tols])
+        self.delta_0 = np.array(delta_0)
+    
+    def instantiate(self, delta, agent):
+        self.eng.workspace['name'] = f'AFC_{agent.type}_breach'
+        if agent.type == 'RL':
+            self.eng.workspace['agent'] = self.eng.load(agent.path)['agent']
+        else:
+            self.eng.workspace['agent'] = 0
+        self.eng.workspace['MAF_sensor_tol'] = delta[0]
+        self.eng.workspace['AF_sensor_tol'] = delta[1]
+        self.eng.InitAFC(nargout=0)
+        return self.eng.workspace['model']
+
+    def get_dev_bounds(self):
+        return self.dev_bounds
+    
+    def get_delta_0(self):
+        return self.delta_0
