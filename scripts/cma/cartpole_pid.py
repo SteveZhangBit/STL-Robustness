@@ -47,7 +47,7 @@ evaluator.heatmap(
     vmax=0.2
 )
 min_delta = normalize(data1['min_delta'].iat[idx], env.get_dev_bounds())
-plt.scatter(min_delta[0]*25, min_delta[1]*25, color='yellow')
+plt.scatter(min_delta[0]*24, min_delta[1]*24, color='yellow')
 plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % data1['min_dist'].iat[idx])
 plt.savefig('gifs/cartpole-pid/fig-robustness.png', bbox_inches='tight')
 # plt.show()
@@ -77,7 +77,7 @@ evaluator.heatmap(
     boundary=data3['min_dist'].iat[idx],
 )
 min_delta = normalize(data3['min_delta'].iat[idx], env.get_dev_bounds())
-plt.scatter(min_delta[0]*25, min_delta[1]*25, color='yellow')
+plt.scatter(min_delta[0]*24, min_delta[1]*24, color='yellow')
 plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % data3['min_dist'].iat[idx])
 plt.savefig('gifs/cartpole-pid/fig-robustness-stl2.png', bbox_inches='tight')
 
