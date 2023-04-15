@@ -36,7 +36,7 @@ phi = BreachSTL('alw (d_rel[t] - t_gap * v_ego[t] >= D_default - 0.5)')
 prob = Problem(env, agent, phi, L2Norm(env))
 sys_eval = BreachSystemEvaluator(eng, phi, {'restarts': 1, 'evals': 30})
 
-samples = np.arange(1, 6) * 20
+samples = np.arange(1, 3) * 20
 
 # Use CMA
 solver = CMASolver(0.1, sys_eval)
@@ -52,7 +52,7 @@ evaluator.heatmap(
     boundary=data1['min_dist'].iat[idx],
 )
 min_delta = normalize(data1['min_delta'].iat[idx], env.get_dev_bounds())
-plt.scatter(min_delta[0]*25, min_delta[1]*25, color='yellow')
+plt.scatter(min_delta[0]*24, min_delta[1]*24, color='yellow')
 plt.title('Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % data1['min_dist'].iat[idx])
 plt.savefig('gifs/ACC/traditional/fig-robustness.png', bbox_inches='tight')
 
@@ -67,8 +67,8 @@ plt.xlabel('Number of samples')
 plt.ylabel('Minimum distance')
 boxplot(
     [
-        [data1['min_dist'].loc[x] for x in samples],
-        [data2['min_dist'].loc[x] for x in samples],
+        [data1['min_dist'].loc[x].clip(0.0, 1.0) for x in samples],
+        [data2['min_dist'].loc[x].clip(0.0, 1.0) for x in samples],
     ],
     ['red', 'blue'],
     samples * (1 + solver.options()['restarts']),

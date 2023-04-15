@@ -179,12 +179,13 @@ class Evaluator:
             c_Y1 = center[1] + np.sqrt(np.clip(boundary**2 - (c_X - center[0])**2, 0, None))
             c_Y2 = center[1] - np.sqrt(np.clip(boundary**2 - (c_X - center[0])**2, 0, None))
             
-            c_X = np.clip(c_X, 0.0, None)
-            c_Y2 = np.clip(c_Y2, 0.0, None)
+            c_X = np.clip(c_X, 0.0, 1.0)
+            c_Y1 = np.clip(c_Y1, 0.0, 1.0)
+            c_Y2 = np.clip(c_Y2, 0.0, 1.0)
 
-            ax.scatter(center[0] * n_x, center[1] * n_y, color='black')
-            ax.plot(c_X * n_x, c_Y1 * n_y, color='black')
-            ax.plot(c_X * n_x, c_Y2 * n_y, color='black')
+            ax.scatter(center[0] * (n_x - 1), center[1] * (n_y - 1), color='black')
+            ax.plot(c_X * (n_x - 1), c_Y1 * (n_y - 1), color='black')
+            ax.plot(c_X * (n_x - 1), c_Y2 * (n_y - 1), color='black')
 
         plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
         return ax, X, Y, Z
