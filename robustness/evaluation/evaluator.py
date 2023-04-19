@@ -68,7 +68,10 @@ class Evaluator:
             samples = np.random.default_rng().normal(center, sigma, (n, len(center)))
             # FIXME: should I clip?
             samples = np.clip(samples, 0.0, 1.0)
-            values = np.asarray([self.solver.sys_evaluator.eval_sys(scale(delta, bounds), self.problem)[0] for delta in samples])
+            values = np.asarray([
+                self.solver.sys_evaluator.eval_sys(scale(delta, bounds), self.problem)[0]
+                for delta in samples
+            ])
             
             data = {'samples': samples, 'values': values}
             with open(file, 'wb') as f:
@@ -77,6 +80,53 @@ class Evaluator:
         count = np.sum(values >= 0.0)
         lower_bound = proportion_confint(count, n, alpha=2 * alpha, method="beta")[0]
         return sigma * (norm.ppf(lower_bound) - norm.ppf(k)) if lower_bound > k else 0.0
+
+    def unsafe_region(self, center, sigma, alpha, out_dir, k=0.5, n=None, epsilon=1e-3):
+        bounds = self.problem.env.get_dev_bounds()
+        center_str = '-'.join([f'{c:.3f}' for c in center])
+        center = normalize(center, bounds)
+
+        check_point = 100
+        total = 0
+        violation = 0
+        radius = 0.0
+        while n is None or total < n:
+            if n is not None and total + check_point > n:
+                total = n
+                n_samples = n - total
+            else:
+                total += check_point
+                n_samples = check_point
+
+            file = os.path.join(out_dir, 'unsafe_ckp', f'{center_str}-{sigma}-{total}.pickle')
+            if os.path.exists(file):
+                with open(file, 'rb') as f:
+                    data = pickle.load(f)
+                samples = data['samples']
+                values = data['values']
+            else:
+                os.makedirs(os.path.join(out_dir, 'unsafe_ckp'), exist_ok=True)
+                samples = np.random.default_rng().normal(center, sigma, (n_samples, len(center)))
+                samples = np.clip(samples, 0.0, 1.0)
+                values = np.asarray([
+                    self.solver.sys_evaluator.eval_sys(scale(delta, bounds), self.problem)[0]
+                    for delta in samples
+                ])
+                data = {'samples': samples, 'values': values}
+                with open(file, 'wb') as f:
+                    pickle.dump(data, f)
+            
+            violation += np.sum(values < 0.0)
+            lower_bound = proportion_confint(violation, total, alpha=2 * alpha, method="beta")[0]
+            radius_new = sigma * (norm.ppf(lower_bound) - norm.ppf(k)) if lower_bound > k else 0.0
+            if radius_new - radius < epsilon:
+                radius = radius_new
+                break
+            else:
+                radius = radius_new
+        
+        return radius
+
 
     def visualize_violation(self, delta, x0=None, gif=None, **kwargs):
         env, _ = self.problem.env.instantiate(delta, **kwargs)
@@ -159,7 +209,7 @@ class Evaluator:
         return ax, X, Y, Z
     
     def heatmap(self, x_bound, y_bound, n_x, n_y, x_name="X", y_name="Y", z_name="Z",
-                override=False, out_dir='data', boundary=None, **kwargs):
+                override=False, out_dir='data', boundary=None, center=None, **kwargs):
         X, Y, Z = self.grid_data(x_bound, y_bound, n_x, n_y, override, out_dir)
         
         _, ax = plt.subplots()
@@ -174,7 +224,11 @@ class Evaluator:
         ax.set_ylabel(y_name)
 
         if boundary is not None:
-            center = normalize(self.problem.env.get_delta_0(), self.problem.env.get_dev_bounds())
+            bounds = self.problem.env.get_dev_bounds()
+            if center is None:
+                center = normalize(self.problem.env.get_delta_0(), bounds)
+            else:
+                center = normalize(center, bounds)
             c_X = np.linspace(center[0] - boundary, center[0] + boundary, 100)
             c_Y1 = center[1] + np.sqrt(np.clip(boundary**2 - (c_X - center[0])**2, 0, None))
             c_Y2 = center[1] - np.sqrt(np.clip(boundary**2 - (c_X - center[0])**2, 0, None))
