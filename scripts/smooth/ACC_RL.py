@@ -40,8 +40,15 @@ evaluator = Evaluator(prob, solver)
 
 # print(solver.sys_evaluator.eval_sys(env.get_delta_0(), prob))
 
-radius = evaluator.smooth_boundary(0.1, 1000, 0.05, 0.9, 'data/ACC/RL')
+# radius = evaluator.smooth_boundary(0.1, 1000, 0.05, 0.9, 'data/ACC/RL')
 # radius = 0.0
+
+delta, _, _ = evaluator.any_violation()
+if delta is None:
+    print('No violation found')
+    exit()
+
+radius = evaluator.unsafe_region(delta, 0.1, 0.05, 'data/ACC/RL', n=10_000)
 
 plt.figure()
 evaluator.heatmap(
@@ -49,8 +56,14 @@ evaluator.heatmap(
     x_name="Max Acceleration", y_name="Min Acceleration", z_name="System Evaluation $\Gamma$",
     out_dir='data/ACC/RL',
     boundary=radius,
+    center=delta,
 )
-plt.title('Smooth Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % radius)
-plt.savefig('gifs/ACC/RL/fig-smooth-robustness.png', bbox_inches='tight')
+# plt.title('Smooth Robustness $\hat{\Delta}: ||\delta - \delta_0||_2 < %.3f$' % radius)
+plt.title('Unsafe Region: $||\delta - \delta_v||_2 < %.3f$' % radius)
+os.makedirs('gifs/ACC/RL/unsafe-region', exist_ok=True)
+
+delta_str = '-'.join([f'{d:.3f}' for d in delta])
+# plt.savefig('gifs/ACC/RL/fig-smooth-robustness.png', bbox_inches='tight')
+plt.savefig(f'gifs/ACC/RL/unsafe-region/fig-{delta_str}.png', bbox_inches='tight')
 
 eng.quit()
