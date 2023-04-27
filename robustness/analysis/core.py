@@ -95,7 +95,7 @@ class Solver:
     def options(self):
         return self._options.copy()
 
-    def any_unsafe_deviation(self, problem: Problem, boundary=None):
+    def any_unsafe_deviation(self, problem: Problem, boundary=None, constraints=None):
         '''Return a tuple of <delta?, dist?, x0?>'''
         raise NotImplementedError()
     

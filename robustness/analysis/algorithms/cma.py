@@ -38,7 +38,7 @@ class CMASolver(Solver):
         super().__init__(sys_evaluator, opts)
         self.sigma = sigma
 
-    def any_unsafe_deviation(self, problem: Problem, boundary=None):
+    def any_unsafe_deviation(self, problem: Problem, boundary=None, constraints=None):
         delta = None
         dist = np.inf
         logger = {}
@@ -54,16 +54,20 @@ class CMASolver(Solver):
             logger[tuple(delta)] = x0
             return v
 
-        if boundary is not None:
-            constraints = lambda delta: [problem.dist.eval_dist(delta) - boundary]
+        if boundary is not None or constraints is not None:
+            all_constraints = lambda delta: (constraints(delta) if constraints is not None else []) + \
+                ([problem.dist.eval_dist(delta) - boundary] if boundary is not None else [])
 
             def random_x0():
-                x0 = normalize(problem.env.get_delta_0(), dev_bounds)
-                return np.clip(np.random.normal(x0, boundary / 2), 0.0, 1.0)
+                if boundary is None:
+                    return np.random.rand(len(problem.env.get_delta_0()))
+                else:
+                    x0 = normalize(problem.env.get_delta_0(), dev_bounds)
+                    return np.clip(np.random.normal(x0, boundary // 2), 0.0, 1.0)
             
             cfun = cma.ConstrainedFitnessAL(
                 lambda x: eval_sys(scale(x, dev_bounds)),
-                lambda x: constraints(scale(x, dev_bounds)),
+                lambda x: all_constraints(scale(x, dev_bounds)),
                 find_feasible_first=True
             )
             for _ in range(1 + restarts):

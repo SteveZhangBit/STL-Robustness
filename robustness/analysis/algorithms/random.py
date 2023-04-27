@@ -28,7 +28,10 @@ class ExpectationSysEvaluator(SystemEvaluator):
 
 
 class RandomSolver(Solver):
-    def any_unsafe_deviation(self, problem: Problem, boundary=None):
+    def any_unsafe_deviation(self, problem: Problem, boundary=None, constraints=None):
+        assert boundary is None, "RandomSolver does not support boundary."
+        assert constraints is None, "RandomSolver does not support constraints."
+
         dist = np.inf
         delta = None
 

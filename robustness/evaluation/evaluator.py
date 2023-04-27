@@ -24,10 +24,12 @@ class Evaluator:
         print('System evaluation options:')
         print(solver.sys_evaluator.options())
     
-    def any_violation(self, boundary=None):
-        return self.solver.any_unsafe_deviation(self.problem, boundary)
+    def any_violation(self, boundary=None, constraints=None):
+        '''Return a tuple of <delta?, dist?, x0?>'''
+        return self.solver.any_unsafe_deviation(self.problem, boundary, constraints)
     
     def min_violation(self, boundary=None):
+        '''Return a tuple of <min_delta?, min_dist?, x0?>'''
         return self.solver.min_unsafe_deviation(self.problem, boundary)
     
     def certified_min_violation(self, n=100, alpha=0.05):
@@ -126,7 +128,43 @@ class Evaluator:
                 radius = radius_new
         
         return radius
+    
+    def multiple_safe_regions(self, sigma, alpha, out_dir, k=0.5, n=None, epsilon=1e-3, max_region=10):
+        regions = [] # (center, radius)
+        for i in range(max_region):
+            print("Iteration:", i+1, "Finding unsafe region...")
+            constraints = self.region_constraints(regions)
+            delta, _, _ = self.any_violation(constraints=constraints)
+            if delta is None:
+                print('No violation found')
+                continue
+            radius = self.unsafe_region(delta, sigma, alpha, out_dir, k=k, n=n, epsilon=epsilon)
+            regions.append((delta, radius))
+            if radius > 0.0:
+                print('Unsafe region found:', delta, radius)
+            else:
+                print('No unsafe region found')
+        
+        return regions
 
+    def region_constraints(self, regions):        
+        bounds = self.problem.env.get_dev_bounds()
+        regions = [(c, r) for (c, r) in regions if r > 0.0]
+
+        if len(regions) == 0:
+            return None
+
+        def constraints(delta):
+            gs = []
+            for (c, r) in regions:
+                r = scale(r, bounds)
+                l, h = c - r, c + r
+                l = np.clip(l, bounds[:, 0], bounds[:, 1])
+                h = np.clip(h, bounds[:, 0], bounds[:, 1])
+                gs.extend(np.min([delta - l, h - delta], axis=0))
+            return gs
+
+        return constraints
 
     def visualize_violation(self, delta, x0=None, gif=None, **kwargs):
         env, _ = self.problem.env.instantiate(delta, **kwargs)
@@ -224,25 +262,32 @@ class Evaluator:
         ax.set_ylabel(y_name)
 
         if boundary is not None:
-            bounds = self.problem.env.get_dev_bounds()
-            if center is None:
-                center = normalize(self.problem.env.get_delta_0(), bounds)
+            if type(boundary) is list:
+                for i in range(len(boundary)):
+                    self._draw_circle(ax, boundary[i], n_x, n_y, center[i])
             else:
-                center = normalize(center, bounds)
-            c_X = np.linspace(center[0] - boundary, center[0] + boundary, 100)
-            c_Y1 = center[1] + np.sqrt(np.clip(boundary**2 - (c_X - center[0])**2, 0, None))
-            c_Y2 = center[1] - np.sqrt(np.clip(boundary**2 - (c_X - center[0])**2, 0, None))
-            
-            c_X = np.clip(c_X, 0.0, 1.0)
-            c_Y1 = np.clip(c_Y1, 0.0, 1.0)
-            c_Y2 = np.clip(c_Y2, 0.0, 1.0)
-
-            ax.scatter(center[0] * (n_x - 1), center[1] * (n_y - 1), color='black')
-            ax.plot(c_X * (n_x - 1), c_Y1 * (n_y - 1), color='black')
-            ax.plot(c_X * (n_x - 1), c_Y2 * (n_y - 1), color='black')
+                self._draw_circle(ax, boundary, n_x, n_y, center)
 
         plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
         return ax, X, Y, Z
+
+    def _draw_circle(self, ax, radius, n_x, n_y, center=None):
+        bounds = self.problem.env.get_dev_bounds()
+        if center is None:
+            center = normalize(self.problem.env.get_delta_0(), bounds)
+        else:
+            center = normalize(center, bounds)
+        c_X = np.linspace(center[0] - radius, center[0] + radius, 100)
+        c_Y1 = center[1] + np.sqrt(np.clip(radius**2 - (c_X - center[0])**2, 0, None))
+        c_Y2 = center[1] - np.sqrt(np.clip(radius**2 - (c_X - center[0])**2, 0, None))
+        
+        c_X = np.clip(c_X, 0.0, 1.0)
+        c_Y1 = np.clip(c_Y1, 0.0, 1.0)
+        c_Y2 = np.clip(c_Y2, 0.0, 1.0)
+
+        ax.scatter(center[0] * (n_x - 1), center[1] * (n_y - 1), color='black')
+        ax.plot(c_X * (n_x - 1), c_Y1 * (n_y - 1), color='black')
+        ax.plot(c_X * (n_x - 1), c_Y2 * (n_y - 1), color='black')
     
     def certify(self, dist, n=100, alpha=0.05):
         '''
