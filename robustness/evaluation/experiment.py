@@ -43,3 +43,22 @@ class Experiment:
             self.evaluator.solver.set_options({'evals': tmp})
         
         return data
+
+    def record_min_violations(self, runs=3, out_dir='data'):
+        os.makedirs(out_dir, exist_ok=True)
+
+        records = []
+        for i in range(runs):
+            record_name = f'{out_dir}/records-min-violations-{i}.pickle'
+            if os.path.exists(record_name):
+                with open(record_name, 'rb') as f:
+                    record = pickle.load(f)
+            else:
+                record = ([], [])
+                self.evaluator.min_violation(sample_logger=record)
+                with open(record_name, 'wb') as f:
+                    pickle.dump(record, f)
+            
+            records.append(record)
+        
+        return records

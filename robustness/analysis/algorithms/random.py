@@ -53,7 +53,7 @@ class RandomSolver(Solver):
         
         return delta, dist, None
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None):
+    def min_unsafe_deviation(self, problem: Problem, boundary=None, sample_logger=None):
         min_dist = np.inf
         min_delta = None
 
@@ -68,6 +68,11 @@ class RandomSolver(Solver):
                 delta = np.random.uniform(dev_bounds[:, 0], dev_bounds[:, 1])
                 dist = problem.dist.eval_dist(delta)
                 constraint = self.sys_evaluator.eval_sys(delta, problem)[0]
+
+                if sample_logger is not None:
+                    sample_logger[0].append(delta)
+                    sample_logger[1].append(constraint)
+
                 if constraint < 0 and dist < min_dist:
                     min_dist = dist
                     min_delta = delta

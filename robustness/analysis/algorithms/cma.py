@@ -107,7 +107,7 @@ class CMASolver(Solver):
         x0 = logger[tuple(delta)] if delta is not None else None
         return delta, dist, x0
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None):
+    def min_unsafe_deviation(self, problem: Problem, boundary=None, sample_logger=None):
         min_dist = np.inf
         min_delta = None
         logger = {}
@@ -147,7 +147,13 @@ class CMASolver(Solver):
             )
             while not es.stop():
                 X = es.ask()
-                es.tell(X, [cfun(x) for x in X])
+                Y = [cfun(x) for x in X]
+                es.tell(X, Y)
+
+                if sample_logger is not None:
+                    sample_logger[0].extend([scale(x, dev_bounds) for x in X])
+                    sample_logger[1].extend(Y)
+
                 cfun.update(es)
             
             print("=============== CMA Results: ===============>")

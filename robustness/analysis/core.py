@@ -99,6 +99,6 @@ class Solver:
         '''Return a tuple of <delta?, dist?, x0?>'''
         raise NotImplementedError()
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None):
+    def min_unsafe_deviation(self, problem: Problem, boundary=None, sample_logger=None):
         '''Return a tuple of <min_delta?, min_dist?, x0?>'''
         raise NotImplementedError()

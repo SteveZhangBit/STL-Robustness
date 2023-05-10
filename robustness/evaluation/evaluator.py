@@ -28,9 +28,11 @@ class Evaluator:
         '''Return a tuple of <delta?, dist?, x0?>'''
         return self.solver.any_unsafe_deviation(self.problem, boundary, constraints)
     
-    def min_violation(self, boundary=None):
+    def min_violation(self, boundary=None, sample_logger=None):
         '''Return a tuple of <min_delta?, min_dist?, x0?>'''
-        return self.solver.min_unsafe_deviation(self.problem, boundary)
+        return self.solver.min_unsafe_deviation(
+            self.problem, boundary=boundary, sample_logger=sample_logger
+        )
     
     def certified_min_violation(self, n=100, alpha=0.05):
         certificated = False

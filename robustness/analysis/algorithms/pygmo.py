@@ -34,7 +34,7 @@ class NSGA2Solver(Solver):
         self.gen = gen
         self.popsize = popsize
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None):
+    def min_unsafe_deviation(self, problem: Problem, boundary=None, sample_logger=None):
         mo = MOMinDev(problem, self.sys_evaluator)
         p = pg.problem(mo)
         algo = pg.algorithm(pg.nsga2(gen=self.gen, m=0.1))
@@ -93,7 +93,7 @@ class GACO(Solver):
         self.gen = gen
         self.popsize = popsize
     
-    def min_unsafe_deviation(self, problem: Problem, boundary=None):
+    def min_unsafe_deviation(self, problem: Problem, boundary=None, sample_logger=None):
         c = ConstrainedMinDev(problem, self.sys_evaluator)
         p = pg.problem(c)
         algo = pg.algorithm(pg.gaco(gen=self.gen, ker=self.popsize))
