@@ -36,12 +36,31 @@ solver = CMASolver(0.2, sys_eval, {'restarts': 1, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 
-experiment.record_min_violations(out_dir='data/cartpole-pid/cma')
+# evaluator.gridplot(masses, forces, 10, 10, 'Mass', 'Force', 'STL', out_dir='data/cartpole-pid')
+# plt.show()
 
+print('Find violations by CMA...')
+records_cma = experiment.record_min_violations(out_dir='data/cartpole-pid/cma')
+records_cma, violations_cma = experiment.summarize_violations(records_cma)
+# Plot all samples
+for i in range(len(records_cma)):
+    samples = [(X, Y) for (X, Y, _) in records_cma[i]]
+    experiment.plot_samples(samples,  'Mass', 'Force', 'data/cartpole-pid', n=20)
+    plt.title('Violations found by CMA')
+    plt.savefig(f'gifs/cartpole-pid/fig-violations-cma-{i}.png', bbox_inches='tight')
+
+# r = evaluator.unsafe_region(violations_cma[0][0][0], 0.1, 0.05, 'data/cartpole-pid', n=1000)
 
 # Use random search
 solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 
-experiment.record_min_violations(out_dir='data/cartpole-pid/random')
+print('Find violations by random search...')
+records_random = experiment.record_min_violations(out_dir='data/cartpole-pid/random')
+records_random, violations_random = experiment.summarize_violations(records_random)
+for i in range(len(records_random)):
+    samples = [(X, Y) for (X, Y, _) in records_random[i]]
+    experiment.plot_samples(samples,  'Mass', 'Force', 'data/cartpole-pid', n=20)
+    plt.title('Violations found by Random')
+    plt.savefig(f'gifs/cartpole-pid/fig-violations-random-{i}.png', bbox_inches='tight')

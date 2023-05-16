@@ -36,7 +36,15 @@ solver = CMASolver(0.2, sys_eval, {'restarts': 1, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 
-experiment.record_min_violations(out_dir='data/cartpole-dqn/cma')
+print('Find violations by CMA...')
+records_cma = experiment.record_min_violations(out_dir='data/cartpole-dqn/cma')
+records_cma, violations_cma = experiment.summarize_violations(records_cma)
+# Plot all samples
+for i in range(len(records_cma)):
+    samples = [(X, Y) for (X, Y, _) in records_cma[i]]
+    experiment.plot_samples(samples,  'Mass', 'Force', 'data/cartpole-dqn', n=20)
+    plt.title('Violations found by CMA')
+    plt.savefig(f'gifs/cartpole-dqn/fig-violations-cma-{i}.png', bbox_inches='tight')
 
 
 # Use random search
@@ -44,4 +52,11 @@ solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 
-experiment.record_min_violations(out_dir='data/cartpole-dqn/random')
+print('Find violations by random search...')
+records_random = experiment.record_min_violations(out_dir='data/cartpole-dqn/random')
+records_random, violations_random = experiment.summarize_violations(records_random)
+for i in range(len(records_random)):
+    samples = [(X, Y) for (X, Y, _) in records_random[i]]
+    experiment.plot_samples(samples,  'Mass', 'Force', 'data/cartpole-dqn', n=20)
+    plt.title('Violations found by Random')
+    plt.savefig(f'gifs/cartpole-dqn/fig-violations-random-{i}.png', bbox_inches='tight')

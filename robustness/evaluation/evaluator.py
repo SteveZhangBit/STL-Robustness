@@ -35,6 +35,11 @@ class Evaluator:
         )
     
     def certified_min_violation(self, n=100, alpha=0.05):
+        '''
+        Deprecated.
+        Iteratively search min violation and try to certify it until there's no
+        smaller distance violations, i.e., certified.
+        '''
         certificated = False
         min_delta, min_dist, min_x0 = None, np.inf, None
         while not certificated:
@@ -57,6 +62,10 @@ class Evaluator:
         return min_delta, min_dist, min_x0
     
     def smooth_boundary(self, sigma, n, alpha, k, out_dir):
+        '''
+        Deprecated.
+        Return the radius of a certified safe region from the origin.
+        '''
         bounds = self.problem.env.get_dev_bounds()
         center = normalize(self.problem.env.get_delta_0(), bounds)
 
@@ -86,6 +95,9 @@ class Evaluator:
         return sigma * (norm.ppf(lower_bound) - norm.ppf(k)) if lower_bound > k else 0.0
 
     def unsafe_region(self, center, sigma, alpha, out_dir, k=0.5, n=None, epsilon=1e-3):
+        '''
+        Given a violation, try to certify the maximum unsafe region around it.
+        '''
         bounds = self.problem.env.get_dev_bounds()
         center_str = '-'.join([f'{c:.3f}' for c in center])
         center = normalize(center, bounds)
@@ -132,6 +144,10 @@ class Evaluator:
         return radius
     
     def multiple_safe_regions(self, sigma, alpha, out_dir, k=0.5, n=None, epsilon=1e-3, max_region=10):
+        '''
+        Deprecated.
+        Iteratively search unsafe regions and add constraints to search new unsafe regions.
+        '''
         regions = [] # (center, radius)
         for i in range(max_region):
             print("Iteration:", i+1, "Finding unsafe region...")
@@ -149,7 +165,11 @@ class Evaluator:
         
         return regions
 
-    def region_constraints(self, regions):        
+    def region_constraints(self, regions):      
+        '''
+        Deprecated.
+        Generate constraints for a list of unsafe regions.
+        '''  
         bounds = self.problem.env.get_dev_bounds()
         regions = [(c, r) for (c, r) in regions if r > 0.0]
 
@@ -206,12 +226,11 @@ class Evaluator:
                 
             X = np.linspace(x_bound[0], x_bound[1], n_x)
             Y = np.linspace(y_bound[0], y_bound[1], n_y)
-            X, Y = np.meshgrid(X, Y, indexing='ij')
+            X, Y = np.meshgrid(X, Y)
 
             Z = np.zeros((n_x, n_y))
             for i in range(n_x):
                 for j in range(n_y):
-                    # treat xv[i,j], yv[i,j]
                     x, y = X[i, j], Y[i, j]
                     v, _ = self.solver.sys_evaluator.eval_sys([x, y], self.problem)
                     Z[i, j] = v
@@ -227,20 +246,20 @@ class Evaluator:
         return X, Y, Z
     
     def gridplot(self, x_bound, y_bound, n_x, n_y, x_name="X", y_name="Y", z_name="Z",
-                  override=False, out_dir='data', boundary=None, **kwargs):
+                  override=False, out_dir='data', **kwargs):
         X, Y, Z = self.grid_data(x_bound, y_bound, n_x, n_y, override, out_dir)
 
         _, ax = plt.subplots(subplot_kw={"projection": "3d"}, figsize=(14, 14))
         
-        if boundary is not None:
-            mask = np.asarray([
-                [self.problem.dist.eval_dist([x, y]) > boundary for x, y in zip(xs, ys)]
-                for xs, ys in zip(X, Y)
-            ])
-            ax.plot_surface(X, Y, np.ma.masked_where(mask, Z), cmap=cm.coolwarm, **kwargs)
-            ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, alpha=0.25, **kwargs)
-        else:
-            ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, **kwargs)
+        # if boundary is not None:
+        #     mask = np.asarray([
+        #         [self.problem.dist.eval_dist([x, y]) > boundary for x, y in zip(xs, ys)]
+        #         for xs, ys in zip(X, Y)
+        #     ])
+        #     ax.plot_surface(X, Y, np.ma.masked_where(mask, Z), cmap=cm.coolwarm, **kwargs)
+        #     ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, alpha=0.25, **kwargs)
+        # else:
+        ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, **kwargs)
         
         ax.set_zlabel(z_name, fontsize=13)
         ax.set_xlabel(x_name, fontsize=13)
@@ -253,10 +272,10 @@ class Evaluator:
         X, Y, Z = self.grid_data(x_bound, y_bound, n_x, n_y, override, out_dir)
         
         _, ax = plt.subplots()
-        im = ax.imshow(Z.T, cmap=cm.coolwarm, **kwargs)
+        im = ax.imshow(Z, cmap=cm.coolwarm, **kwargs)
         
-        ax.set_xticks(np.arange(0, len(X[:, 0]), 3), labels=['{:.2f}'.format(x) for x in X[:, 0][::3]])
-        ax.set_yticks(np.arange(0, len(Y[0]), 3), labels=['{:.2f}'.format(y) for y in Y[0][::3]])
+        ax.set_xticks(np.arange(0, len(X[0]), 3), labels=['{:.2f}'.format(x) for x in X[0][::3]])
+        ax.set_yticks(np.arange(0, len(Y[:, 0]), 3), labels=['{:.2f}'.format(y) for y in Y[:, 0][::3]])
         cbar = ax.figure.colorbar(im)
         cbar.ax.set_ylabel(z_name, rotation=-90, va="bottom")
 
@@ -293,7 +312,9 @@ class Evaluator:
     
     def certify(self, dist, n=100, alpha=0.05):
         '''
-        Return <lower bound?, violated delta?, violated x0?>.
+        Deprecated.
+        Given a radius, consider it as a Bernoulli distribution, sample n points from it,
+        and compute the confidence interval. Return <lower bound?, violated delta?, violated x0?>.
         '''
         bounds = self.problem.env.get_dev_bounds()
         center = normalize(self.problem.env.get_delta_0(), bounds)

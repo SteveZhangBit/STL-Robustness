@@ -1,9 +1,11 @@
 import os
 import pickle
 from datetime import datetime
+from matplotlib import pyplot as plt
 
 import numpy as np
 import pandas as pd
+from robustness.analysis.utils import normalize
 
 from robustness.evaluation import Evaluator
 
@@ -54,11 +56,50 @@ class Experiment:
                 with open(record_name, 'rb') as f:
                     record = pickle.load(f)
             else:
-                record = ([], [])
+                record = [[], [], None]
+                start_time = datetime.now()
                 self.evaluator.min_violation(sample_logger=record)
+                record[2] = (datetime.now() - start_time).total_seconds()
                 with open(record_name, 'wb') as f:
                     pickle.dump(record, f)
             
             records.append(record)
         
         return records
+
+    def summarize_violations(self, records):
+        print('Total time of sampling: ', [record[2] for record in records])
+        records = [
+            [
+                (X, Y, self.evaluator.problem.dist.eval_dist(X))
+                for (X, Y) in zip(record[0], record[1])
+            ]
+            for record in records
+        ]
+        violations = [[r for r in record if r[1] < 0.0] for record in records]
+        
+        print('Number of violations found: ', [len(record) for record in violations])
+        print('Minimum violation found: ',
+              [np.min([z for (_, _, z) in record]) if len(record) > 0 else None for record in violations])
+        print('Maximum violation found: ',
+              [np.max([z for (_, _, z) in record]) if len(record) > 0 else None for record in violations])
+        print('Average violation found: ',
+              [np.mean([z for (_, _, z) in record]) if len(record) > 0 else None for record in violations])
+
+        return records, violations
+
+    def plot_samples(self, samples, x_name, y_name, out_dir, n):
+        dev_bounds = self.evaluator.problem.env.get_dev_bounds()
+
+        plt.figure()
+        self.evaluator.heatmap(
+            dev_bounds[0], dev_bounds[1], n, n,
+            x_name=x_name, y_name=y_name, z_name="System Evaluation $\Gamma$",
+            out_dir=out_dir,
+        )
+        points = np.array([normalize(X, dev_bounds) for (X, Y) in samples if Y >= 0.0])
+        plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c=np.arange(len(points)),
+                    cmap='Greys', marker='x', s=50)
+
+        points = np.array([normalize(X, dev_bounds) for (X, Y) in samples if Y < 0.0])
+        plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='yellow', marker='x', s=100)

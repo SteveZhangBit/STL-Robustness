@@ -120,7 +120,7 @@ class CMASolver(Solver):
 
         def eval_sys(delta):
             v, x0 = self.sys_evaluator.eval_sys(delta, problem)
-            logger[tuple(delta)] = x0
+            logger[tuple(delta)] = (v, x0)
             return v
 
         if boundary is not None:
@@ -147,13 +147,7 @@ class CMASolver(Solver):
             )
             while not es.stop():
                 X = es.ask()
-                Y = [cfun(x) for x in X]
-                es.tell(X, Y)
-
-                if sample_logger is not None:
-                    sample_logger[0].extend([scale(x, dev_bounds) for x in X])
-                    sample_logger[1].extend(Y)
-
+                es.tell(X, [cfun(x) for x in X])
                 cfun.update(es)
             
             print("=============== CMA Results: ===============>")
@@ -168,5 +162,10 @@ class CMASolver(Solver):
                     min_dist = delta_dist
                     min_delta = delta
         
-        x0 = logger[tuple(min_delta)] if min_delta is not None else None
+        if sample_logger is not None:
+            for (k, v) in logger.items():
+                sample_logger[0].append(k)
+                sample_logger[1].append(v[0])
+        
+        _, x0 = logger[tuple(min_delta)] if min_delta is not None else None
         return min_delta, min_dist, x0

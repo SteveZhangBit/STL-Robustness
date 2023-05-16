@@ -34,12 +34,26 @@ solver = CMASolver(0.2, sys_eval, {'restarts': 1, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 
-experiment.record_min_violations(out_dir='data/lunar-lander-lqr/cma')
-
+print('Find violations by CMA...')
+records_cma = experiment.record_min_violations(out_dir='data/lunar-lander-lqr/cma')
+records_cma, violations_cma = experiment.summarize_violations(records_cma)
+# Plot all samples
+for i in range(len(records_cma)):
+    samples = [(X, Y) for (X, Y, _) in records_cma[i]]
+    experiment.plot_samples(samples, 'Wind', 'Turbulence', 'data/lunar-lander-lqr', n=20)
+    plt.title('Violations found by CMA')
+    plt.savefig(f'gifs/lunar-lander-lqr/fig-violations-cma-{i}', bbox_inches='tight')
 
 # Use random search
 solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 
-experiment.record_min_violations(out_dir='data/lunar-lander-lqr/random')
+print('Find violations by random search...')
+records_random = experiment.record_min_violations(out_dir='data/lunar-lander-lqr/random')
+records_random, violations_random = experiment.summarize_violations(records_random)
+for i in range(len(records_random)):
+    samples = [(X, Y) for (X, Y, _) in records_random[i]]
+    experiment.plot_samples(samples, 'Wind', 'Turbulence', 'data/lunar-lander-lqr', n=20)
+    plt.title('Violations found by Random')
+    plt.savefig(f'gifs/lunar-lander-lqr/fig-violations-random-{i}', bbox_inches='tight')
