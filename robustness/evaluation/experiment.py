@@ -88,7 +88,7 @@ class Experiment:
 
         return records, violations
 
-    def plot_samples(self, samples, x_name, y_name, out_dir, n):
+    def plot_samples(self, samples, x_name, y_name, out_dir, n, **kwargs):
         dev_bounds = self.evaluator.problem.env.get_dev_bounds()
 
         plt.figure()
@@ -96,6 +96,7 @@ class Experiment:
             dev_bounds[0], dev_bounds[1], n, n,
             x_name=x_name, y_name=y_name, z_name="System Evaluation $\Gamma$",
             out_dir=out_dir,
+            **kwargs
         )
         points = np.array([normalize(X, dev_bounds) for (X, Y) in samples if Y >= 0.0])
         plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c=np.arange(len(points)),
