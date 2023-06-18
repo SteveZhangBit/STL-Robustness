@@ -103,4 +103,5 @@ class Experiment:
                     cmap='Greys', marker='x', s=50)
 
         points = np.array([normalize(X, dev_bounds) for (X, Y) in samples if Y < 0.0])
-        plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='yellow', marker='x', s=100)
+        if len(points) > 0:
+            plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='yellow', marker='x', s=100)
