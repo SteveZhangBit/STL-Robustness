@@ -105,3 +105,24 @@ class Experiment:
         points = np.array([normalize(X, dev_bounds) for (X, Y) in samples if Y < 0.0])
         if len(points) > 0:
             plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='yellow', marker='x', s=100)
+    
+    def min_violation_of_all(self, violations):
+        deviations = [r[0] for records in violations for r in records]
+        if len(deviations) == 0:
+            return None
+        
+        dists = [r[2] for records in violations for r in records]
+        return deviations[np.argmin(dists)]
+    
+    def plot_unsafe_region(self, violation, radius, x_name, y_name, out_dir, n, **kwargs):
+        dev_bounds = self.evaluator.problem.env.get_dev_bounds()
+
+        plt.figure()
+        self.evaluator.heatmap(
+            dev_bounds[0], dev_bounds[1], n, n,
+            x_name=x_name, y_name=y_name, z_name="System Evaluation $\Gamma$",
+            out_dir=out_dir,
+            center=violation,
+            boundary=radius,
+            **kwargs
+        )
