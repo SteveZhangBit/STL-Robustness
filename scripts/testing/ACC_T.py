@@ -46,6 +46,13 @@ for i in range(len(records_cma)):
     plt.title('Violations found by CMA')
     plt.savefig(f'gifs/ACC/traditional/fig-violations-cma-{i}.png', bbox_inches='tight')
 
+# Find the minimum violation and certify an unsafe region
+min_violation = experiment.min_violation_of_all(violations_cma)
+if min_violation is not None:
+    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/ACC/traditional', n=1000)
+    experiment.plot_unsafe_region(min_violation, radius, 'Max acceleration', 'Min acceleration', 'data/ACC/traditional', n=20)
+    plt.title('Unsafe region found by CMA')
+    plt.savefig('gifs/ACC/traditional/fig-unsafe-region-cma.png', bbox_inches='tight')
 
 # Use random search
 solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
@@ -61,3 +68,11 @@ for i in range(len(records_random)):
     experiment.plot_samples(samples, 'Max acceleration', 'Min acceleration', 'data/ACC/traditional', n=20)
     plt.title('Violations found by Random')
     plt.savefig(f'gifs/ACC/traditional/fig-violations-random-{i}.png', bbox_inches='tight')
+
+# Find the minimum violation and certify an unsafe region
+min_violation = experiment.min_violation_of_all(violations_random)
+if min_violation is not None:
+    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/ACC/traditional', n=1000)
+    experiment.plot_unsafe_region(min_violation, radius, 'Max acceleration', 'Min acceleration', 'data/ACC/traditional', n=20)
+    plt.title('Unsafe region found by Random')
+    plt.savefig('gifs/ACC/traditional/fig-unsafe-region-random.png', bbox_inches='tight')
