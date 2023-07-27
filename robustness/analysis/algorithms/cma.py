@@ -167,5 +167,5 @@ class CMASolver(Solver):
                 sample_logger[0].append(k)
                 sample_logger[1].append(v[0])
         
-        _, x0 = logger[tuple(min_delta)] if min_delta is not None else None
+        _, x0 = logger[tuple(min_delta)] if min_delta is not None else (None, None)
         return min_delta, min_dist, x0
