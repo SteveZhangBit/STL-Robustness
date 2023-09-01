@@ -46,6 +46,10 @@ for i in range(len(records_cma)):
     plt.title('Violations found by CMA')
     plt.savefig(f'gifs/ACC/traditional/fig-violations-cma-{i}.png', bbox_inches='tight')
 
+experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_cma], 'Max acceleration', 'Min acceleration', 'data/ACC/traditional', n=20)
+plt.title('Violations found by CMA')
+plt.savefig(f'gifs/ACC/traditional/fig-violations-cma-all.png', bbox_inches='tight')
+
 # Find the minimum violation and certify an unsafe region
 min_violation = experiment.min_violation_of_all(violations_cma)
 if min_violation is not None:
@@ -68,6 +72,10 @@ for i in range(len(records_random)):
     experiment.plot_samples(samples, 'Max acceleration', 'Min acceleration', 'data/ACC/traditional', n=20)
     plt.title('Violations found by Random')
     plt.savefig(f'gifs/ACC/traditional/fig-violations-random-{i}.png', bbox_inches='tight')
+
+experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Max acceleration', 'Min acceleration', 'data/ACC/traditional', n=20)
+plt.title('Violations found by Random')
+plt.savefig(f'gifs/ACC/traditional/fig-violations-random-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
 min_violation = experiment.min_violation_of_all(violations_random)
