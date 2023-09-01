@@ -57,6 +57,21 @@ class DevCartPole(DeviatableEnv):
         return env.observation_space
 
 
+class DevCartPole2(DevCartPole):
+    def __init__(self, cart_masses, pole_masses, pole_lengths, forces, delta_0=(1.0, 0.1, 0.5, 10.0)):
+        self.cart_masses = cart_masses
+        self.pole_masses = pole_masses
+        self.pole_lengths = pole_lengths
+        self.forces = forces
+        self.x0_bounds = np.repeat([[-0.05, 0.05]], 4, axis=0)
+        self.delta_0 = np.array(delta_0)
+        self.dev_bounds = np.array([self.cart_masses, self.pole_masses, self.pole_lengths, self.forces])
+    
+    def instantiate(self, delta):
+        return ParamCartPoleEnv(masscart=delta[0], masspole=delta[1], length=delta[2], force_mag=delta[3]), \
+            self.x0_bounds
+
+
 class SafetyProp(STLEvaluator):
     def __init__(self, pickle_safe=False):
         super().__init__(pickle_safe)
