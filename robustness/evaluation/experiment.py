@@ -98,13 +98,17 @@ class Experiment:
             out_dir=out_dir,
             **kwargs
         )
-        points = np.array([normalize(X, dev_bounds) for (X, Y) in samples if Y >= 0.0])
-        plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c=np.arange(len(points)),
-                    cmap='Greys', marker='x', s=50)
+        if type(samples[0]) is tuple:
+            samples = [samples]
+        
+        for s in samples:
+            points = np.array([normalize(X, dev_bounds) for (X, Y) in s if Y >= 0.0])
+            plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c=np.arange(len(points)),
+                        cmap='Greys', marker='x', s=50)
 
-        points = np.array([normalize(X, dev_bounds) for (X, Y) in samples if Y < 0.0])
-        if len(points) > 0:
-            plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='yellow', marker='x', s=100)
+            points = np.array([normalize(X, dev_bounds) for (X, Y) in s if Y < 0.0])
+            if len(points) > 0:
+                plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='yellow', marker='x', s=100)
     
     def min_violation_of_all(self, violations):
         deviations = [r[0] for records in violations for r in records]
