@@ -35,7 +35,7 @@ experiment = Experiment(evaluator)
 
 print('Find violations by CMA...')
 records_cma = experiment.record_min_violations(out_dir='data/cartpole4-pid/cma')
-records_cma, violations_cma = experiment.summarize_violations(records_cma)
+records_cma, violations_cma = experiment.summarize_violations(records_cma, 'data/cartpole4-pid/cma')
 
 # Use random search
 solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 200})
@@ -44,4 +44,4 @@ experiment = Experiment(evaluator)
 
 print('Find violations by random search...')
 records_random = experiment.record_min_violations(out_dir='data/cartpole4-pid/random')
-records_random, violations_random = experiment.summarize_violations(records_random)
+records_random, violations_random = experiment.summarize_violations(records_random, 'data/cartpole4-pid/random')

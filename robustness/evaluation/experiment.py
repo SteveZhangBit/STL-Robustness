@@ -67,8 +67,8 @@ class Experiment:
         
         return records
 
-    def summarize_violations(self, records):
-        print('Total time of sampling: ', [record[2] for record in records])
+    def summarize_violations(self, records, out_dir):
+        total_times = [record[2] for record in records]
         records = [
             [
                 (X, Y, self.evaluator.problem.dist.eval_dist(X))
@@ -78,13 +78,19 @@ class Experiment:
         ]
         violations = [[r for r in record if r[1] < 0.0] for record in records]
         
-        print('Number of violations found: ', [len(record) for record in violations])
-        print('Minimum violation found: ',
-              [np.min([z for (_, _, z) in record]) if len(record) > 0 else None for record in violations])
-        print('Maximum violation found: ',
-              [np.max([z for (_, _, z) in record]) if len(record) > 0 else None for record in violations])
-        print('Average violation found: ',
-              [np.mean([z for (_, _, z) in record]) if len(record) > 0 else None for record in violations])
+        num_samples = [len(record) for record in records]
+        num_violations = [len(record) for record in violations]
+        min_distances = [np.min([z for (_, _, z) in record]) if len(record) > 0 else None for record in violations]
+        max_distances = [np.max([z for (_, _, z) in record]) if len(record) > 0 else None for record in violations]
+        mean_distances = [np.mean([z for (_, _, z) in record]) if len(record) > 0 else None for record in violations]
+        std_distances = [np.std([z for (_, _, z) in record]) if len(record) > 0 else None for record in violations]
+
+        summary = pd.DataFrame(
+            np.array([num_samples, num_violations, min_distances, max_distances, mean_distances, std_distances, total_times]).T,
+            columns=["Num of samples", "Num of violations", "Min distance", "Max distance", "Mean distance", "Std distance", "Total time (s)"]
+        )
+        print(summary)
+        summary.to_csv(f'{out_dir}/summary.csv', index=False)
 
         return records, violations
 
