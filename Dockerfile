@@ -20,12 +20,12 @@ RUN apt-get update \
     && /miniconda/bin/conda init bash
 
 # Compile RTAMT
-RUN git clone https://github.com/nickovic/rtamt.git \
-    && cd /rtamt/rtamt \
-    && mkdir build \
-    && cd build \
-    && cmake -DPythonVersion=3 ../ \
-    && make
+# RUN git clone https://github.com/nickovic/rtamt.git \
+#     && cd /rtamt/rtamt \
+#     && mkdir build \
+#     && cd build \
+#     && cmake -DPythonVersion=3 ../ \
+#     && make
 
 # Install conda environments
 ENV PATH="${PATH}:/miniconda/bin"
