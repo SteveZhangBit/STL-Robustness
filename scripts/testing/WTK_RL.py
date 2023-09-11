@@ -44,7 +44,7 @@ experiment = Experiment(evaluator)
 
 print('Find violations by CMA...')
 records_cma = experiment.record_min_violations(out_dir='data/WTK/RL/cma')
-records_cma, violations_cma = experiment.summarize_violations(records_cma)
+records_cma, violations_cma = experiment.summarize_violations(records_cma, 'data/WTK/RL/cma')
 # Plot the samples
 for i in range(len(records_cma)):
     samples = [(X, Y) for (X, Y, _) in records_cma[i]]
@@ -71,7 +71,7 @@ experiment = Experiment(evaluator)
 
 print('Find violations by random search...')
 records_random = experiment.record_min_violations(out_dir='data/WTK/RL/random')
-records_random, violations_random = experiment.summarize_violations(records_random)
+records_random, violations_random = experiment.summarize_violations(records_random, 'data/WTK/RL/random')
 # Plot the samples
 for i in range(len(records_random)):
     samples = [(X, Y) for (X, Y, _) in records_random[i]]
