@@ -46,10 +46,10 @@ cma_datas = [read_data(f'data/{data_dir}/cma/summary.csv') for data_dir in data_
 cma_data = pd.concat(cma_datas, keys=names)
 cma_data.index.names = ['Problem', 'Trial']
 print(cma_data)
-cma_data[['Violations/Total', 'Violation distance', 'Total time (s)']].to_csv('data/cma-summary.csv', float_format='%.2f')
+cma_data[['Violations/Total', 'Violation Distance', 'Total time (s)']].to_csv('data/cma-summary.csv', float_format='%.2f')
 
 random_datas = [read_data(f'data/{data_dir}/random/summary.csv') for data_dir in data_dirs]
 random_data = pd.concat(random_datas, keys=names)
 random_data.index.names = ['Problem', 'Trial']
 print(random_data)
-random_data[['Violations/Total', 'Violation distance', 'Total time (s)']].to_csv('data/random-summary.csv', float_format='%.2f')
+random_data[['Violations/Total', 'Violation Distance', 'Total time (s)']].to_csv('data/random-summary.csv', float_format='%.2f')
