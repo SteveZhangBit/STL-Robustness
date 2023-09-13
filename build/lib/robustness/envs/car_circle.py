@@ -63,38 +63,6 @@ class DevCarCircle(DeviatableEnv):
         env = self.instantiate(self.delta_0)[0]
         return env.observation_space
 
-class DevCarCircle2(DeviatableEnv):
-    def __init__(self, load_dir, speed_multiplier, steering_multiplier, max_force,  delta_0=(20.0, 0.5,10)):
-        super().__init__()
-
-        self.load_dir = load_dir
-        self.speed_multiplier = speed_multiplier
-        self.steering_multiplier = steering_multiplier
-        self.max_force = max_force
-        self.x0_bounds = np.repeat([[-3, 3]], 2, axis=0)
-        self.delta_0 = np.array(delta_0)
-        self.dev_bounds = np.array([self.speed_multiplier, self.steering_multiplier, self.max_force])
-
-    def instantiate(self, delta, render=False):
-        _, config = setup_eval_configs(self.load_dir)
-        evaluator = Evaluator(**config, config_dict=config)
-        evaluator._init_env()
-        env = evaluator.env
-        if render:
-            env.render()
-        env.agent.speed_multiplier, env.agent.steering_multiplier, env.agent.max_force = delta[0], delta[1], delta[2]
-        return CarCircleWrapper(env), self.x0_bounds
-    
-    def get_dev_bounds(self):
-        return self.dev_bounds
-    
-    def get_delta_0(self):
-        return self.delta_0
-    
-    def observation_space(self):
-        env = self.instantiate(self.delta_0)[0]
-        return env.observation_space
-
 
 class SafetyProp(STLEvaluator):
     def prop(self):

@@ -4,11 +4,11 @@ from bullet_safety_gym.envs.tasks import angle2pos
 from rsrl.evaluator import Evaluator
 from rsrl.util.run_util import setup_eval_configs
 
-from robustness.analysis.stl import STLEvaluator, STLEvaluator2
+from robustness.analysis.stl import STLEvaluator
 from robustness.envs import DeviatableEnv
 
 
-class CarCircleWrapper:
+class DroneCircleWrapper:
     def __init__(self, env):
         self.env = env
     
@@ -32,17 +32,17 @@ class CarCircleWrapper:
         return self.env.get_observation()
 
 
-class DevCarCircle(DeviatableEnv):
-    def __init__(self, load_dir, speed_multiplier, steering_multiplier, delta_0=(20.0, 0.5)):
+class DevDroneCircle(DeviatableEnv):
+    def __init__(self, load_dir, air_density, mass, delta_0=(1.225, 1.42)):
         super().__init__()
 
         self.load_dir = load_dir
-        self.speed_multiplier = speed_multiplier
-        self.steering_multiplier = steering_multiplier
+        self.air_density = air_density
+        self.mass = mass
         self.x0_bounds = np.repeat([[-3, 3]], 2, axis=0)
         self.delta_0 = np.array(delta_0)
-        self.dev_bounds = np.array([self.speed_multiplier, self.steering_multiplier])
-
+        self.dev_bounds = np.array([air_density, mass])
+    
     def instantiate(self, delta, render=False):
         _, config = setup_eval_configs(self.load_dir)
         evaluator = Evaluator(**config, config_dict=config)
@@ -50,40 +50,10 @@ class DevCarCircle(DeviatableEnv):
         env = evaluator.env
         if render:
             env.render()
-        env.agent.speed_multiplier, env.agent.steering_multiplier = delta[0], delta[1]
-        return CarCircleWrapper(env), self.x0_bounds
-    
-    def get_dev_bounds(self):
-        return self.dev_bounds
-    
-    def get_delta_0(self):
-        return self.delta_0
-    
-    def observation_space(self):
-        env = self.instantiate(self.delta_0)[0]
-        return env.observation_space
-
-class DevCarCircle2(DeviatableEnv):
-    def __init__(self, load_dir, speed_multiplier, steering_multiplier, max_force,  delta_0=(20.0, 0.5,10)):
-        super().__init__()
-
-        self.load_dir = load_dir
-        self.speed_multiplier = speed_multiplier
-        self.steering_multiplier = steering_multiplier
-        self.max_force = max_force
-        self.x0_bounds = np.repeat([[-3, 3]], 2, axis=0)
-        self.delta_0 = np.array(delta_0)
-        self.dev_bounds = np.array([self.speed_multiplier, self.steering_multiplier, self.max_force])
-
-    def instantiate(self, delta, render=False):
-        _, config = setup_eval_configs(self.load_dir)
-        evaluator = Evaluator(**config, config_dict=config)
-        evaluator._init_env()
-        env = evaluator.env
-        if render:
-            env.render()
-        env.agent.speed_multiplier, env.agent.steering_multiplier, env.agent.max_force = delta[0], delta[1], delta[2]
-        return CarCircleWrapper(env), self.x0_bounds
+        env.agent.air_density, env.agent.mass = delta[0], delta[1]
+        v = env.agent.get_stationary_joint_velocity()
+        env.agent.hover_velocities = env.agent.propeller_directions * v
+        return DroneCircleWrapper(env), self.x0_bounds
     
     def get_dev_bounds(self):
         return self.dev_bounds
@@ -105,12 +75,3 @@ class SafetyProp(STLEvaluator):
         return {
             'x': stl.Signal(np.abs(record[:, 0]), time_index)
         }
-
-
-class SafetyProp2(STLEvaluator2):
-    '''
-    Deprecated.
-    '''
-    def eval_one_timepoint(self, obs):
-        x = np.abs(obs[0])
-        return 0.7 - x

@@ -7,6 +7,7 @@ from robustness.agents import Agent
 class PPO(Agent):
     def __init__(self, model_path) -> None:
         from stable_baselines3 import PPO as BaselinePPO
+
         self.model = BaselinePPO.load(model_path)
     
     def next_action(self, obs):
