@@ -746,6 +746,31 @@ class DevLunarLander(DeviatableEnv):
         env = self.instantiate(self.delta_0)[0]
         return env.observation_space
 
+class DevLunarLander2(DeviatableEnv):
+    def __init__(self, winds, turbulences, grav, delta_0):
+        assert winds[0] <= delta_0[0] <= winds[1] and turbulences[0] <= delta_0[1] <= turbulences[1] and  grav[0] <= delta_0[2] <= grav[1] , \
+            'delta_0 should be witin the domain of the deviation'
+
+        self.winds = winds
+        self.turbulences = turbulences
+        self.gravity = grav
+        self.x0_bounds = np.repeat([[-INITIAL_RANDOM, INITIAL_RANDOM]], 2, axis=0)
+        self.delta_0 = np.array(delta_0)
+        self.dev_bounds = np.array([winds, turbulences, grav])
+    
+    def instantiate(self, delta):
+        return LunarLander(enable_wind=True, continuous=True, wind_power=delta[0], turbulence_power=delta[1], gravity = delta[2]), self.x0_bounds
+    
+    def get_dev_bounds(self):
+        return self.dev_bounds
+    
+    def get_delta_0(self):
+        return self.delta_0
+    
+    def observation_space(self):
+        env = self.instantiate(self.delta_0)[0]
+        return env.observation_space
+
 
 class SafetyProp(STLEvaluator):
     def __init__(self, pickle_safe=False):
