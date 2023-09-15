@@ -1,0 +1,13 @@
+Problem,Trial,Violations/Total,Violation Distance,Total time (s)
+cartpole4-pid,0,47/400,0.63$\pm$0.09 (0.46-0.83),375.41
+cartpole4-pid,1,51/400,0.65$\pm$0.10 (0.46-0.91),375.75
+cartpole4-pid,2,54/400,0.65$\pm$0.09 (0.47-0.83),374.42
+lunarlander3-ppo,0,276/400,0.64$\pm$0.19 (0.14-1.01),7224.59
+lunarlander3-ppo,1,281/400,0.64$\pm$0.18 (0.15-1.02),7152.63
+lunarlander3-ppo,2,277/400,0.64$\pm$0.19 (0.12-1.00),7128.21
+car-circle3-ppo,0,37/100,0.64$\pm$0.16 (0.28-0.98),4734.30
+car-circle3-ppo,1,36/100,0.60$\pm$0.20 (0.33-0.99),4707.00
+car-circle3-ppo,2,30/100,0.62$\pm$0.20 (0.14-1.00),4979.31
+ACC3-traditional,0,0/100,nan$\pm$nan (nan-nan),12267.33
+ACC3-traditional,1,1/100,0.76$\pm$0.00 (0.76-0.76),12458.02
+ACC3-traditional,2,0/100,nan$\pm$nan (nan-nan),12483.41
