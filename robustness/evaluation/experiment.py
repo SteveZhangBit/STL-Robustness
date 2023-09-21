@@ -68,6 +68,11 @@ class Experiment:
         return records
 
     def summarize_violations(self, records, out_dir):
+        # truncate the number of samples to align with the defined samples.
+        options = self.evaluator.solver.options()
+        samples_in_options = options['evals'] * (1 + options['restarts'])
+        records = [[record[0][:samples_in_options], record[1][:samples_in_options], record[2]] for record in records]
+
         total_times = [record[2] for record in records]
         records = [
             [

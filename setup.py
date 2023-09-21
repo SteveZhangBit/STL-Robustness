@@ -19,6 +19,8 @@ setuptools.setup(
         'signal_temporal_logic',
         'imageio',
         'pygmo',
+        'statsmodels',
+        'matlabengine',
     ],
     packages=setuptools.find_packages(),
     classifiers=[

@@ -53,12 +53,12 @@ plt.title('Violations found by CMA')
 plt.savefig(f'gifs/AFC/RL/fig-violations-cma-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
-min_violation = experiment.min_violation_of_all(violations_cma)
-if min_violation is not None:
-    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/AFC/RL', n=1000)
-    experiment.plot_unsafe_region(min_violation, radius, 'MAF Sensor Tolerance', 'AF Sensor Tolerance', 'data/AFC/RL', n=20)
-    plt.title('Unsafe region found by CMA')
-    plt.savefig('gifs/AFC/RL/fig-unsafe-region-cma.png', bbox_inches='tight')
+# min_violation = experiment.min_violation_of_all(violations_cma)
+# if min_violation is not None:
+#     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/AFC/RL', n=1000)
+#     experiment.plot_unsafe_region(min_violation, radius, 'MAF Sensor Tolerance', 'AF Sensor Tolerance', 'data/AFC/RL', n=20)
+#     plt.title('Unsafe region found by CMA')
+#     plt.savefig('gifs/AFC/RL/fig-unsafe-region-cma.png', bbox_inches='tight')
 
 # Use random search
 solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
@@ -80,9 +80,9 @@ plt.title('Violations found by Random')
 plt.savefig(f'gifs/AFC/RL/fig-violations-random-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
-min_violation = experiment.min_violation_of_all(violations_random)
-if min_violation is not None:
-    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/AFC/RL', n=1000)
-    experiment.plot_unsafe_region(min_violation, radius, 'MAF Sensor Tolerance', 'AF Sensor Tolerance', 'data/AFC/RL', n=20)
-    plt.title('Unsafe region found by random search')
-    plt.savefig('gifs/AFC/RL/fig-unsafe-region-random.png', bbox_inches='tight')
+# min_violation = experiment.min_violation_of_all(violations_random)
+# if min_violation is not None:
+#     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/AFC/RL', n=1000)
+#     experiment.plot_unsafe_region(min_violation, radius, 'MAF Sensor Tolerance', 'AF Sensor Tolerance', 'data/AFC/RL', n=20)
+#     plt.title('Unsafe region found by random search')
+#     plt.savefig('gifs/AFC/RL/fig-unsafe-region-random.png', bbox_inches='tight')
