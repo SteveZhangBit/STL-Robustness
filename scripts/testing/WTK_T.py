@@ -48,12 +48,12 @@ records_cma, violations_cma = experiment.summarize_violations(records_cma, 'data
 # Plot the samples
 for i in range(len(records_cma)):
     samples = [(X, Y) for (X, Y, _) in records_cma[i]]
-    experiment.plot_samples(samples, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
+    experiment.plot_samples(samples, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20)
     plt.title('Violations found by CMA')
     plt.savefig(f'gifs/WTK/traditional/fig-violations-cma-{i}.png', bbox_inches='tight')
 
-experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_cma], 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
-plt.title('Violations found by CMA')
+experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_cma], 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20)
+# plt.title('WTK-PID with CMA')
 plt.savefig(f'gifs/WTK/traditional/fig-violations-cma-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
@@ -75,12 +75,12 @@ records_random, violations_random = experiment.summarize_violations(records_rand
 # Plot the samples
 for i in range(len(records_random)):
     samples = [(X, Y) for (X, Y, _) in records_random[i]]
-    experiment.plot_samples(samples, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
+    experiment.plot_samples(samples, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20)
     plt.title('Violations found by Random')
     plt.savefig(f'gifs/WTK/traditional/fig-violations-random-{i}.png', bbox_inches='tight')
 
-experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
-plt.title('Violations found by Random')
+experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20)
+# plt.title('WTK-PID with Random')
 plt.savefig(f'gifs/WTK/traditional/fig-violations-random-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region

@@ -44,7 +44,7 @@ for i in range(len(records_cma)):
     plt.savefig(f'gifs/lunar-lander-ppo/fig-violations-cma-{i}', bbox_inches='tight')
 
 experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_cma], 'Wind', 'Turbulence', 'data/lunar-lander-ppo', n=20)
-plt.title('Violations found by CMA')
+# plt.title('Lunar-Lander-PPO with CMA')
 plt.savefig(f'gifs/lunar-lander-ppo/fig-violations-cma-all', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
@@ -71,7 +71,7 @@ for i in range(len(records_random)):
     plt.savefig(f'gifs/lunar-lander-ppo/fig-violations-random-{i}', bbox_inches='tight')
 
 experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Wind', 'Turbulence', 'data/lunar-lander-ppo', n=20)
-plt.title('Violations found by Random')
+# plt.title('Lunar-Lander-PPO with Random')
 plt.savefig(f'gifs/lunar-lander-ppo/fig-violations-random-all', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
