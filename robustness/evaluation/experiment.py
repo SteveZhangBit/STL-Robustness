@@ -115,11 +115,11 @@ class Experiment:
         for s in samples:
             points = np.array([normalize(X, dev_bounds) for (X, Y) in s if Y >= 0.0])
             plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='gray',
-                        marker='o', alpha=0.5, edgecolor='white', s=99)
+                        marker='x', alpha=0.90, s=40)
 
             points = np.array([normalize(X, dev_bounds) for (X, Y) in s if Y < 0.0])
             if len(points) > 0:
-                plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='#FED976', marker='o', edgecolor='white', s=99)
+                plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='yellow', marker='x', s=80)
     
     def min_violation_of_all(self, violations):
         deviations = [r[0] for records in violations for r in records]

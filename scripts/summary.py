@@ -52,16 +52,22 @@ summarize(data_dirs, names, 'random', 'data/random-summary.csv')
 
 data_dirs = [
     'cartpole4-pid',
+    'cartpole4-dqn',
+    'lunarlander3-lqr',
     'lunarlander3-ppo',
     'car-circle3-ppo',
-    'ACC3/traditional'
+    'ACC3/traditional',
+    'ACC3/RL',
 ]
 
 names = [
     'cartpole4-pid',
+    'cartpole4-dqn',
+    'lunarlander3-lqr',
     'lunarlander3-ppo',
     'car-circle3-ppo',
-    'ACC3-traditional'
+    'ACC3-traditional',
+    'ACC3-RL',
 ]
 
 summarize(data_dirs, names, 'cma', 'data/cma-summary-2.csv')

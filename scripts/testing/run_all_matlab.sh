@@ -7,7 +7,7 @@ python scripts/testing/ACC_RL.py
 # Run the ACC_T env
 python scripts/testing/ACC_T.py
 # Run the ACC3_RL env
-# python scripts/testing/ACC3_RL.py
+python scripts/testing/ACC3_RL.py
 # Run the ACC3_T env
 python scripts/testing/ACC3_T.py
 
