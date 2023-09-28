@@ -1,0 +1,4 @@
+Num of samples,Num of violations,Min distance,Max distance,Mean distance,Std distance,Total time (s)
+100,0,,,,,12267.329124
+100,1,0.7580701518984437,0.7580701518984437,0.7580701518984437,0.0,12458.016507
+100,0,,,,,12483.413867

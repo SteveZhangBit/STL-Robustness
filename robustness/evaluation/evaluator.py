@@ -6,7 +6,8 @@ import pandas as pd
 import imageio
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import cm
+from matplotlib import cm, colors
+from matplotlib.ticker import FormatStrFormatter
 from statsmodels.stats.proportion import proportion_confint
 from scipy.stats import norm
 
@@ -270,14 +271,17 @@ class Evaluator:
     def heatmap(self, x_bound, y_bound, n_x, n_y, x_name="X", y_name="Y", z_name="Z",
                 override=False, out_dir='data', boundary=None, center=None, **kwargs):
         X, Y, Z = self.grid_data(x_bound, y_bound, n_x, n_y, override, out_dir)
-        
+
         _, ax = plt.subplots()
-        im = ax.imshow(Z, cmap=cm.coolwarm, **kwargs)
+        vmax, vmin = Z.max() if Z.max() > 0 else -Z.min(), Z.min() if Z.min() < 0 else -Z.max()
+        im = ax.imshow(Z, cmap=cm.coolwarm, norm=colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax), **kwargs)
         
         ax.set_xticks(np.arange(0, len(X[0]), 3), labels=['{:.2f}'.format(x) for x in X[0][::3]])
         ax.set_yticks(np.arange(0, len(Y[:, 0]), 3), labels=['{:.2f}'.format(y) for y in Y[:, 0][::3]])
-        cbar = ax.figure.colorbar(im)
-        cbar.ax.set_ylabel(z_name, rotation=-90, va="bottom")
+        
+        cbar = ax.figure.colorbar(im, ticks=[vmin, 0, vmax])
+        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter("%.2f"))
+        # cbar.ax.set_ylabel(z_name, rotation=-90, va="bottom")
 
         ax.set_xlabel(x_name)
         ax.set_ylabel(y_name)

@@ -44,16 +44,16 @@ for i in range(len(records_cma)):
     plt.savefig(f'gifs/lunar-lander-ppo/fig-violations-cma-{i}', bbox_inches='tight')
 
 experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_cma], 'Wind', 'Turbulence', 'data/lunar-lander-ppo', n=20)
-plt.title('Violations found by CMA')
+# plt.title('Lunar-Lander-PPO with CMA')
 plt.savefig(f'gifs/lunar-lander-ppo/fig-violations-cma-all', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
-min_violation = experiment.min_violation_of_all(violations_cma)
-if min_violation is not None:
-    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/lunar-lander-ppo', n=1000)
-    experiment.plot_unsafe_region(min_violation, radius, 'Wind', 'Turbulence', 'data/lunar-lander-ppo', n=20)
-    plt.title('Unsafe region found by CMA')
-    plt.savefig('gifs/lunar-lander-ppo/fig-unsafe-region-cma', bbox_inches='tight')
+# min_violation = experiment.min_violation_of_all(violations_cma)
+# if min_violation is not None:
+#     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/lunar-lander-ppo', n=1000)
+#     experiment.plot_unsafe_region(min_violation, radius, 'Wind', 'Turbulence', 'data/lunar-lander-ppo', n=20)
+#     plt.title('Unsafe region found by CMA')
+#     plt.savefig('gifs/lunar-lander-ppo/fig-unsafe-region-cma', bbox_inches='tight')
 
 
 # Use random search
@@ -71,13 +71,13 @@ for i in range(len(records_random)):
     plt.savefig(f'gifs/lunar-lander-ppo/fig-violations-random-{i}', bbox_inches='tight')
 
 experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Wind', 'Turbulence', 'data/lunar-lander-ppo', n=20)
-plt.title('Violations found by Random')
+# plt.title('Lunar-Lander-PPO with Random')
 plt.savefig(f'gifs/lunar-lander-ppo/fig-violations-random-all', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
-min_violation = experiment.min_violation_of_all(violations_random)
-if min_violation is not None:
-    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/lunar-lander-ppo', n=1000)
-    experiment.plot_unsafe_region(min_violation, radius, 'Wind', 'Turbulence', 'data/lunar-lander-ppo', n=20)
-    plt.title('Unsafe region found by Random')
-    plt.savefig('gifs/lunar-lander-ppo/fig-unsafe-region-random', bbox_inches='tight')
+# min_violation = experiment.min_violation_of_all(violations_random)
+# if min_violation is not None:
+#     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/lunar-lander-ppo', n=1000)
+#     experiment.plot_unsafe_region(min_violation, radius, 'Wind', 'Turbulence', 'data/lunar-lander-ppo', n=20)
+#     plt.title('Unsafe region found by Random')
+#     plt.savefig('gifs/lunar-lander-ppo/fig-unsafe-region-random', bbox_inches='tight')

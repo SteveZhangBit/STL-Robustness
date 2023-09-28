@@ -51,12 +51,12 @@ for i in range(len(records_cma)):
     plt.savefig(f'gifs/LKA/traditional/fig-violations-cma-{i}.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
-min_violation = experiment.min_violation_of_all(violations_cma)
-if min_violation is not None:
-    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/LKA/traditional', n=1000)
-    experiment.plot_unsafe_region(min_violation, radius, 'Turn 1', 'Turn 2', 'data/LKA/traditional', n=20)
-    plt.title('Unsafe region found by CMA')
-    plt.savefig('gifs/LKA/traditional/fig-unsafe-region-cma.png', bbox_inches='tight')
+# min_violation = experiment.min_violation_of_all(violations_cma)
+# if min_violation is not None:
+#     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/LKA/traditional', n=1000)
+#     experiment.plot_unsafe_region(min_violation, radius, 'Turn 1', 'Turn 2', 'data/LKA/traditional', n=20)
+#     plt.title('Unsafe region found by CMA')
+#     plt.savefig('gifs/LKA/traditional/fig-unsafe-region-cma.png', bbox_inches='tight')
 
 # Use random search
 solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
@@ -74,9 +74,9 @@ for i in range(len(records_random)):
     plt.savefig(f'gifs/LKA/traditional/fig-violations-random-{i}.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
-min_violation = experiment.min_violation_of_all(violations_random)
-if min_violation is not None:
-    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/LKA/traditional', n=1000)
-    experiment.plot_unsafe_region(min_violation, radius, 'Turn 1', 'Turn 2', 'data/LKA/traditional', n=20)
-    plt.title('Unsafe region found by random search')
-    plt.savefig('gifs/LKA/traditional/fig-unsafe-region-random.png', bbox_inches='tight')
+# min_violation = experiment.min_violation_of_all(violations_random)
+# if min_violation is not None:
+#     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/LKA/traditional', n=1000)
+#     experiment.plot_unsafe_region(min_violation, radius, 'Turn 1', 'Turn 2', 'data/LKA/traditional', n=20)
+#     plt.title('Unsafe region found by random search')
+#     plt.savefig('gifs/LKA/traditional/fig-unsafe-region-random.png', bbox_inches='tight')

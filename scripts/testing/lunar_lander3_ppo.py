@@ -22,9 +22,9 @@ plt.rc('legend', fontsize=14)
 
 winds = [0.0, 10.0]
 turbulences = [0.0, 1.0]
-grav = [-11.0, 0.0]
+grav = [-12.0, 0.0]
 env = DevLunarLander2(winds, turbulences, grav, (5.0, 0.5, -10.0))
-agent = PPO('/usr0/home/parvk/cj_project/STL-Robustness/models/lunar-lander/ppo.zip')
+agent = PPO('models/lunar-lander/ppo.zip')
 phi = SafetyProp()
 
 

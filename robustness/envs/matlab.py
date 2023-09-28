@@ -1,5 +1,6 @@
 from robustness.envs import DeviatableEnv
 import numpy as np
+import matlab
 
 
 class DevACC(DeviatableEnv):
@@ -17,6 +18,35 @@ class DevACC(DeviatableEnv):
         # the acceleration is constrained to the range [-1,1] (m/s^2).
         self.eng.workspace['amax_lead'] = delta[0]
         self.eng.workspace['amin_lead'] = delta[1]
+        self.eng.InitACC(nargout=0)
+        return self.eng.workspace['model']
+    
+    def get_dev_bounds(self):
+        return self.dev_bounds
+    
+    def get_delta_0(self):
+        return self.delta_0
+
+
+class DevACC2(DeviatableEnv):
+    def __init__(self, eng, amax_lead_bounds, amin_lead_bounds, mass_bounds, delta_0):
+        self.eng = eng
+        self.amax_lead_bounds = amax_lead_bounds
+        self.amin_lead_bounds = amin_lead_bounds
+        self.mass_bounds = mass_bounds
+        self.dev_bounds = np.array([amax_lead_bounds, amin_lead_bounds, mass_bounds])
+        self.delta_0 = np.array(delta_0)
+    
+    def instantiate(self, delta, agent):
+        self.eng.workspace['name'] = f'ACC_{agent.type}_breach'
+        if agent.type == 'RL':
+            self.eng.workspace['agent'] = self.eng.load(agent.path)['agent']
+        # the acceleration is constrained to the range [-1,1] (m/s^2).
+        self.eng.workspace['amax_lead'] = delta[0]
+        self.eng.workspace['amin_lead'] = delta[1]
+        # set G_ego = tf(1, [M * 0.5, M * 1, 0]);
+        numerator, denominator = matlab.double([1.0]), matlab.double([delta[2] * 0.5, delta[2] * 1.0, 0.0])
+        self.eng.workspace['G_ego'] = self.eng.tf(numerator, denominator)
         self.eng.InitACC(nargout=0)
         return self.eng.workspace['model']
     

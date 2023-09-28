@@ -47,16 +47,16 @@ for i in range(len(records_cma)):
     plt.savefig(f'gifs/cartpole-dqn/fig-violations-cma-{i}.png', bbox_inches='tight')
 
 experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_cma],  'Mass', 'Force', 'data/cartpole-dqn', n=20)
-plt.title('Violations found by CMA')
+# plt.title('Cart-Pole-DQN with CMA')
 plt.savefig(f'gifs/cartpole-dqn/fig-violations-cma-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
-min_violation = experiment.min_violation_of_all(violations_cma)
-if min_violation is not None:
-    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/cartpole-dqn', n=1000)
-    experiment.plot_unsafe_region(min_violation, radius, 'Mass', 'Force', 'data/cartpole-dqn', n=20)
-    plt.title('Unsafe region found by CMA')
-    plt.savefig('gifs/cartpole-dqn/fig-unsafe-region-cma.png', bbox_inches='tight')
+# min_violation = experiment.min_violation_of_all(violations_cma)
+# if min_violation is not None:
+#     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/cartpole-dqn', n=1000)
+#     experiment.plot_unsafe_region(min_violation, radius, 'Mass', 'Force', 'data/cartpole-dqn', n=20)
+#     plt.title('Unsafe region found by CMA')
+#     plt.savefig('gifs/cartpole-dqn/fig-unsafe-region-cma.png', bbox_inches='tight')
 
 
 # Use random search
@@ -74,13 +74,13 @@ for i in range(len(records_random)):
     plt.savefig(f'gifs/cartpole-dqn/fig-violations-random-{i}.png', bbox_inches='tight')
 
 experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random],  'Mass', 'Force', 'data/cartpole-dqn', n=20)
-plt.title('Violations found by Random')
+# plt.title('Cart-Pole-DQN with Random')
 plt.savefig(f'gifs/cartpole-dqn/fig-violations-random-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
-min_violation = experiment.min_violation_of_all(violations_random)
-if min_violation is not None:
-    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/cartpole-dqn', n=1000)
-    experiment.plot_unsafe_region(min_violation, radius, 'Mass', 'Force', 'data/cartpole-dqn', n=20)
-    plt.title('Unsafe region found by Random')
-    plt.savefig('gifs/cartpole-dqn/fig-unsafe-region-random.png', bbox_inches='tight')
+# min_violation = experiment.min_violation_of_all(violations_random)
+# if min_violation is not None:
+#     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/cartpole-dqn', n=1000)
+#     experiment.plot_unsafe_region(min_violation, radius, 'Mass', 'Force', 'data/cartpole-dqn', n=20)
+#     plt.title('Unsafe region found by Random')
+#     plt.savefig('gifs/cartpole-dqn/fig-unsafe-region-random.png', bbox_inches='tight')

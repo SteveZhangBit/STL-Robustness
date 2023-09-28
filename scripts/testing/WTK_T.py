@@ -48,21 +48,21 @@ records_cma, violations_cma = experiment.summarize_violations(records_cma, 'data
 # Plot the samples
 for i in range(len(records_cma)):
     samples = [(X, Y) for (X, Y, _) in records_cma[i]]
-    experiment.plot_samples(samples, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
+    experiment.plot_samples(samples, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20)
     plt.title('Violations found by CMA')
     plt.savefig(f'gifs/WTK/traditional/fig-violations-cma-{i}.png', bbox_inches='tight')
 
-experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_cma], 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
-plt.title('Violations found by CMA')
+experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_cma], 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20)
+# plt.title('WTK-PID with CMA')
 plt.savefig(f'gifs/WTK/traditional/fig-violations-cma-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
-min_violation = experiment.min_violation_of_all(violations_cma)
-if min_violation is not None:
-    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/WTK/traditional', n=1000)
-    experiment.plot_unsafe_region(min_violation, radius, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
-    plt.title('Unsafe region found by CMA')
-    plt.savefig('gifs/WTK/traditional/fig-unsafe-region-cma.png', bbox_inches='tight')
+# min_violation = experiment.min_violation_of_all(violations_cma)
+# if min_violation is not None:
+#     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/WTK/traditional', n=1000)
+#     experiment.plot_unsafe_region(min_violation, radius, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
+#     plt.title('Unsafe region found by CMA')
+#     plt.savefig('gifs/WTK/traditional/fig-unsafe-region-cma.png', bbox_inches='tight')
 
 # Use random search
 solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
@@ -75,18 +75,18 @@ records_random, violations_random = experiment.summarize_violations(records_rand
 # Plot the samples
 for i in range(len(records_random)):
     samples = [(X, Y) for (X, Y, _) in records_random[i]]
-    experiment.plot_samples(samples, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
+    experiment.plot_samples(samples, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20)
     plt.title('Violations found by Random')
     plt.savefig(f'gifs/WTK/traditional/fig-violations-random-{i}.png', bbox_inches='tight')
 
-experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
-plt.title('Violations found by Random')
+experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20)
+# plt.title('WTK-PID with Random')
 plt.savefig(f'gifs/WTK/traditional/fig-violations-random-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
-min_violation = experiment.min_violation_of_all(violations_random)
-if min_violation is not None:
-    radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/WTK/traditional', n=1000)
-    experiment.plot_unsafe_region(min_violation, radius, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
-    plt.title('Unsafe region found by Random')
-    plt.savefig('gifs/WTK/traditional/fig-unsafe-region-random.png', bbox_inches='tight')
+# min_violation = experiment.min_violation_of_all(violations_random)
+# if min_violation is not None:
+#     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/WTK/traditional', n=1000)
+#     experiment.plot_unsafe_region(min_violation, radius, 'Inflow rate', 'Outflow rate', 'data/WTK/traditional', n=20, vmin=-2.5)
+#     plt.title('Unsafe region found by Random')
+#     plt.savefig('gifs/WTK/traditional/fig-unsafe-region-random.png', bbox_inches='tight')

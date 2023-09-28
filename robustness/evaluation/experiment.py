@@ -68,6 +68,11 @@ class Experiment:
         return records
 
     def summarize_violations(self, records, out_dir):
+        # truncate the number of samples to align with the defined samples.
+        options = self.evaluator.solver.options()
+        samples_in_options = options['evals'] * (1 + options['restarts'])
+        records = [[record[0][:samples_in_options], record[1][:samples_in_options], record[2]] for record in records]
+
         total_times = [record[2] for record in records]
         records = [
             [
@@ -109,12 +114,12 @@ class Experiment:
         
         for s in samples:
             points = np.array([normalize(X, dev_bounds) for (X, Y) in s if Y >= 0.0])
-            plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c=np.arange(len(points)),
-                        cmap='Greys', marker='x', s=50)
+            plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='gray',
+                        marker='x', alpha=0.90, s=40)
 
             points = np.array([normalize(X, dev_bounds) for (X, Y) in s if Y < 0.0])
             if len(points) > 0:
-                plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='yellow', marker='x', s=100)
+                plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='yellow', marker='x', s=80)
     
     def min_violation_of_all(self, violations):
         deviations = [r[0] for records in violations for r in records]
