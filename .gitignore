@@ -7,4 +7,5 @@ outcmaes/
 *.asv
 *.autosave
 *.mexa64
+*.csv
 # **/unsafe_ckp/

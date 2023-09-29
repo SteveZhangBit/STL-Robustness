@@ -1,5 +1,6 @@
 import numpy as np
-
+import csv
+import os
 from robustness.agents import Agent
 from robustness.envs import DeviatableEnv
 
@@ -57,23 +58,49 @@ class SystemEvaluator:
         '''Return a tuple of <result, x0?>'''
         raise NotImplementedError()
     
-    def _eval_trace(self, x0, env, agent):
+    def save_data(self, delta, obs, action, robustness):
+        os.makedirs('../../traces/', exist_ok=True)
+        file_path = '../../traces/trace_data.csv'
+        fin = np.concatenate((obs, action), axis=1)
+        delta = delta.T
+        delta_repeat = np.tile(delta, (len(obs), 1))
+        rob = np.array([robustness]).reshape(1,1)
+        rob_repeat = np.tile(rob, (301, 1))
+        temp_trace = np.concatenate((delta_repeat, fin), axis=1)
+        final_trace = np.concatenate((rob_repeat, temp_trace), axis=1)
+        # Open the CSV file in write mode
+        with open(file_path, mode='a', newline='') as file:
+            writer = csv.writer(file)
+
+            # Write the header
+            writer.writerow([' Robustness', ' Delta', ' States', ' Actions'])
+
+            # Write the data rows
+            for row in final_trace:
+                writer.writerow(row)
+    
+    def _eval_trace(self, x0, env, agent, delta):
+        # added delta to the function call for logging traces
         space = env.observation_space
         episode_len = self._options['episode_len']
 
         obs = env.reset_to(x0)
         obs_record = [obs]
         reward_record = [0]
-
+        action_array = []
         agent.reset()
         for _ in range(episode_len):
             action = agent.next_action(obs)
+            action_array.append(action)
             obs, reward, _, _ = env.step(action)
             obs_record.append(np.clip(obs, space.low, space.high))
             reward_record.append(reward)
-        
-        return self.phi.eval_trace(np.array(obs_record), np.array(reward_record))
+        action_array.append(env.action_space.sample())
+        score = self.phi.eval_trace(np.array(obs_record), np.array(reward_record))
+        if score < 0:
+            self.save_data(delta, np.array(obs_record),np.array(action_array), score)
 
+        return score
 
 class Solver:
     def __init__(self, sys_evaluator: SystemEvaluator, opts=None):

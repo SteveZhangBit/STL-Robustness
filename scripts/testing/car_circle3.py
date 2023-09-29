@@ -18,7 +18,7 @@ plt.rc('xtick', labelsize=14)
 plt.rc('ytick', labelsize=14)
 plt.rc('legend', fontsize=14)
 
-load_dir = 'models/car_circle_ppo_vanilla/model_save/model.pt'
+load_dir = 'usr0/home/parvk/cj_project/STL-Robustness/models/car_circle_ppo_vanilla/model_save/model.pt'
 speed = [5.0, 35.0]
 steering = [0.2, 0.8]
 force = [5,50]

@@ -24,7 +24,7 @@ winds = [0.0, 10.0]
 turbulences = [0.0, 1.0]
 grav = [-12.0, 0.0]
 env = DevLunarLander2(winds, turbulences, grav, (5.0, 0.5, -10.0))
-agent = PPO('models/lunar-lander/ppo.zip')
+agent = PPO('/usr0/home/parvk/cj_project/STL-Robustness/models/lunar-lander/ppo.zip')
 phi = SafetyProp()
 
 
@@ -36,7 +36,7 @@ sys_eval = CMASystemEvaluator(
 )
 
 # Use CMA
-solver = Nelder_MeadSolver(0.2, sys_eval, {'restarts': 1, 'evals': 200})
+solver = CMASolver(0.2, sys_eval, {'restarts': 1, 'evals': 200})
 evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 

@@ -18,9 +18,11 @@ class CMASystemEvaluator(SystemEvaluator):
         env, x0_bounds = problem.env.instantiate(delta)
         min_v = np.inf
         min_x0 = None
+        # porting following code to ask tell architecture for more granular control
+        # on second thoughts, not needed.
         for _ in range(1 + restarts):
             x, es = cma.fmin2(
-                lambda x: self._eval_trace(scale(x, x0_bounds), env, problem.agent),
+                lambda x: self._eval_trace(scale(x, x0_bounds), env, problem.agent, delta),
                 lambda: np.random.rand(len(x0_bounds)),
                 self.sigma,
                 {'bounds': [0.0, 1.0], 'maxfevals': max_evals, 'timeout': timeout * 60, 'verbose': -9},
@@ -29,6 +31,21 @@ class CMASystemEvaluator(SystemEvaluator):
             if v < min_v:
                 min_v = v
                 min_x0 = x0
+        # for _ in range(1 + restarts):
+        #     opts = cma.CMAOptions()
+        #     opts.set('maxfevals', max_evals)
+        #     opts.set('bounds', [0.0, 1.0])
+        #     opts.set('timeout', timeout)
+        #     opts['tolx'] = 1e-11
+        #     es = cma.CMAEvolutionStrategy(lambda: np.random.rand(len(x0_bounds)), self.sigma)
+
+        #     while not es.stop():
+        #         X = es.ask()  # sample len(X) candidate solutions
+        #         es.tell(X, [lambda x: self._eval_trace(scale(x, x0_bounds), env, problem.agent) for x in X])
+        #         cfun.update(es)
+        #         es.disp()
+        
+        
         env.close()
         return min_v, min_x0
 
