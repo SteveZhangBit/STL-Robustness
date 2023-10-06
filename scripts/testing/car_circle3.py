@@ -18,7 +18,7 @@ plt.rc('xtick', labelsize=14)
 plt.rc('ytick', labelsize=14)
 plt.rc('legend', fontsize=14)
 
-load_dir = 'usr0/home/parvk/cj_project/STL-Robustness/models/car_circle_ppo_vanilla/model_save/model.pt'
+load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_circle_ppo_vanilla/model_save/model.pt'
 speed = [5.0, 35.0]
 steering = [0.2, 0.8]
 force = [5,50]
@@ -41,7 +41,7 @@ print('Find violations by CMA...')
 records_cma = experiment.record_min_violations(out_dir='data/car-circle3-ppo/cma')
 records_cma, violations_cma = experiment.summarize_violations(records_cma, 'data/car-circle3-ppo/cma')
 
-# Use random search
+# # Use random search
 solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
@@ -49,3 +49,11 @@ experiment = Experiment(evaluator)
 print('Find violations by random search...')
 records_random = experiment.record_min_violations(out_dir='data/car-circle3-ppo/random')
 records_random, violations_random = experiment.summarize_violations(records_random, 'data/car-circle3-ppo/random')
+# Generate a gif
+import pickle
+
+with open('data/car-circle3-ppo/cma/records-min-violations-0.pickle', 'rb') as f:
+    data = pickle.load(f)
+delta = data[0][np.argmin(data[1])]
+delt = np.array(delta)
+evaluator.visualize_violation(delt, gif="gifs/car-circle-ppo/counterexample.gif", render=True)
