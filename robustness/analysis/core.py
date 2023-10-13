@@ -74,6 +74,14 @@ class SystemEvaluator:
         
         return self.phi.eval_trace(np.array(obs_record), np.array(reward_record))
 
+    def get_all_traces(self):
+        '''Return all the evaluated traces after the sampling is completed.'''
+        raise NotImplementedError()
+    
+    def get_violating_traces(self):
+        '''Return all the violating traces after the sampling is completed.'''
+        raise NotImplementedError()
+
 
 class Solver:
     def __init__(self, sys_evaluator: SystemEvaluator, opts=None):
