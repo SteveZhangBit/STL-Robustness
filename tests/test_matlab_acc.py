@@ -26,12 +26,15 @@ agent = Traditional()
 phi = BreachSTL('alw (d_rel[t] - t_gap * v_ego[t] >= D_default - 0.5)')
 
 prob = Problem(env, agent, phi, L2Norm(env))
-sys_eval = BreachSystemEvaluator(eng, phi, {'restarts': 1, 'evals': 50})
+sys_eval = BreachSystemEvaluator(eng, phi, {'restarts': 1, 'evals': 10})
 
 # The deviation is out of range, here just for testing purpose
 sys_eval.eval_sys((2.0, -2.0), prob)
 all_traces= sys_eval.get_all_traces()
-print('==================================> all_traces:\n', all_traces)
+print('==================================> all_traces:')
+print(all_traces.keys())
+print('Num of traces:', len(all_traces['d_rel']))
+print('Head of signal "d_rel", trace 1:', all_traces['d_rel'][0][0][:10])
 
-violation_traces = sys_eval.get_violating_traces()
-print('==================================> violation_traces:\n', violation_traces)
+# violation_traces = sys_eval.get_violating_traces()
+# print('==================================> violation_traces:\n', violation_traces)

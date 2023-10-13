@@ -19,16 +19,18 @@ function [obj_best, all_signal_values, violation_signal_values] = breach_falsifi
 
     signal_names = traces.GetSignalList;
     for i = 1:length(signal_names)
-      if isempty(all_signal_values.(signal_names{i}))
-        all_signal_values.(signal_names{i}) = traces.GetSignalValues(signal_names{i});
-      else
+      if isfield(all_signal_values, signal_names{i})
         all_signal_values.(signal_names{i}) = [all_signal_values.(signal_names{i}); traces.GetSignalValues(signal_names{i})];
-      end
-      
-      if isempty(violation_signal_values.(signal_names{i}))
-        violation_signal_values.(signal_names{i}) = traces.GetSignalValues(signal_names{i}, violation_indices);
       else
-        violation_signal_values.(signal_names{i}) = [violation_signal_values.(signal_names{i}); traces.GetSignalValues(signal_names{i}, violation_indices)];
+        all_signal_values.(signal_names{i}) = traces.GetSignalValues(signal_names{i});
+      end
+
+      if isempty(violation_indices) == false
+        if isfield(violation_signal_values, signal_names{i})
+          violation_signal_values.(signal_names{i}) = [violation_signal_values.(signal_names{i}); traces.GetSignalValues(signal_names{i}, violation_indices)];
+        else
+          violation_signal_values.(signal_names{i}) = traces.GetSignalValues(signal_names{i}, violation_indices);
+        end
       end
     end
   end
