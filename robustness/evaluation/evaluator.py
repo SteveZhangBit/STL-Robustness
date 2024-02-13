@@ -375,7 +375,7 @@ class EpisodeVisualizer:
         )
         self.img.set_data(self.env.render(mode='rgb_array'))
         self.fig.canvas.draw()
-        # display.display(fig)
+        #display.display(fig)
         # display.clear_output(wait=True)
         return np.array(self.fig.canvas.buffer_rgba())
 
@@ -406,6 +406,8 @@ class EpisodeVisualizer:
             reward_record.append(reward)
 
             if gif is not None:
+                v = self.phi.eval_trace(np.array(obs_record), np.array(reward_record))
+
                 fig_data = self._update_fig(
                     step, total_reward, done,
                     self.phi.eval_trace(np.array(obs_record), np.array(reward_record))
@@ -417,6 +419,6 @@ class EpisodeVisualizer:
                     time.sleep(sleep)
 
         if gif is not None:
-            imageio.mimsave(gif, [data for data in gif_data], fps=10)
-
+                imageio.mimsave(gif, [data for data in gif_data], duration=100)
+        print(v)
         return self.phi.eval_trace(np.array(obs_record), np.array(reward_record))

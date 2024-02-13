@@ -58,9 +58,12 @@ class SystemEvaluator:
         '''Return a tuple of <result, x0?>'''
         raise NotImplementedError()
     
-    def save_data(self, delta, obs, action, robustness):
+    def save_data(self, delta, obs, action, robustness, type_traj):
         os.makedirs('../../traces/', exist_ok=True)
-        file_path = '../../traces/trace_data.csv'
+        if type_traj=='violated':
+            file_path = '../../traces/trace_data_new.csv'
+        else:
+            file_path = '../../traces/trace_nominal_data.csv'
         fin = np.concatenate((obs, action), axis=1)
         delta = delta.T
         delta_repeat = np.tile(delta, (len(obs), 1))
@@ -98,7 +101,9 @@ class SystemEvaluator:
         action_array.append(env.action_space.sample())
         score = self.phi.eval_trace(np.array(obs_record), np.array(reward_record))
         if score < 0:
-            self.save_data(delta, np.array(obs_record),np.array(action_array), score)
+            self.save_data(delta, np.array(obs_record),np.array(action_array), score,type_traj='violated')
+        else:
+            self.save_data(delta, np.array(obs_record),np.array(action_array), score,type_traj='safe')
 
         return score
 

@@ -57,8 +57,9 @@ with open('data/car-run32-ppo/cma/records-min-violations-0.pickle', 'rb') as f:
     data = pickle.load(f)
 print(data)
 delta = data[0][np.argmin(data[1])]
+print(delta)
 #delta = data[0][10]
 delta=(20.0, 0.5, 10)
 delt = np.array(delta)
-evaluator.visualize_violation(delt, gif="gifs/car-run-ppo/nominal.gif", render=True)
+#evaluator.visualize_violation(delt, gif="gifs/car-run-ppo/nominal.gif", render=True)
 

@@ -105,6 +105,17 @@ class SafetyProp(STLEvaluator):
             'vel': stl.Signal(np.linalg.norm(record[:, 2:4], axis=1), time_index)
         }
 
+class SafetyProp3(STLEvaluator):
+    def prop(self):
+        y = stl.Predicate('y')
+        vel = stl.Predicate('vel')
+        return stl.Always((y < 0.2))
+    
+    def build_signal(self, record, time_index):
+        return {
+            'y': stl.Signal(np.abs(record[:, 1]), time_index),
+            'vel': stl.Signal(np.linalg.norm(record[:, 2:4], axis=1), time_index)
+        }
 
 class SafetyProp2(STLEvaluator2):
     '''

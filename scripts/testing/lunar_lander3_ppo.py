@@ -36,13 +36,13 @@ sys_eval = CMASystemEvaluator(
 )
 
 # Use CMA
-solver = CMASolver(0.2, sys_eval, {'restarts': 1, 'evals': 200})
+solver = CMASolver(0.2, sys_eval, {'restarts': 1, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 
 print('Find violations by CMA...')
-records_cma = experiment.record_min_violations(out_dir='data/lunarlander3-ppo/cma')
-records_cma, violations_cma = experiment.summarize_violations(records_cma, 'data/lunarlander3-ppo/cma')
+records_cma = experiment.record_min_violations(out_dir='data/lunarlander32-ppo/cma')
+records_cma, violations_cma = experiment.summarize_violations(records_cma, 'data/lunarlander32-ppo/cma')
 
 # Use random search
 solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 200})
@@ -50,5 +50,5 @@ evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 
 print('Find violations by random search...')
-records_random = experiment.record_min_violations(out_dir='data/lunarlander3-ppo/random')
-records_random, violations_random = experiment.summarize_violations(records_random, 'data/lunarlander3-ppo/random')
+records_random = experiment.record_min_violations(out_dir='data/lunarlander32-ppo/random')
+records_random, violations_random = experiment.summarize_violations(records_random, 'data/lunarlander32-ppo/random')
