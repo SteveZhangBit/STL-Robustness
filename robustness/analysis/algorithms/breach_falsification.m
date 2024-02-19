@@ -1,8 +1,13 @@
-function [obj_best, all_signal_values, violation_signal_values] = breach_falsification(env, phi, trials, evals)
+function [obj_best, obj_values, all_signal_values, violation_signal_values, all_param_values, violation_param_values] = breach_falsification(env, phi, trials, evals)
 
   obj_best = inf;
+  obj_values = [];
+
   all_signal_values = struct();
   violation_signal_values = struct();
+
+  all_param_values = struct();
+  violation_param_values = struct();
 
   for n = 1:trials
     phi = STL_Formula('phi', phi);
@@ -11,7 +16,9 @@ function [obj_best, all_signal_values, violation_signal_values] = breach_falsifi
     falsif_pb.StopAtFalse = false;
     falsif_pb.setup_solver('cmaes');
     falsif_pb.solve();
+
     obj_best = min(obj_best, falsif_pb.obj_best);
+    obj_values = falsif_pb.obj_log;
 
     traces = falsif_pb.GetLog;
     summary = traces.GetSummary;
@@ -31,6 +38,14 @@ function [obj_best, all_signal_values, violation_signal_values] = breach_falsifi
         else
           violation_signal_values.(signal_names{i}) = traces.GetSignalValues(signal_names{i}, violation_indices);
         end
+      end
+    end
+
+    param_names = traces.GetParamList;
+    for i = 1:length(param_names)
+      all_param_values.(param_names{i}) = traces.GetParam(param_names{i});
+      if isempty(violation_indices) == false
+        violation_param_values.(param_names{i}) = traces.GetParam(param_names{i}, violation_indices);
       end
     end
   end

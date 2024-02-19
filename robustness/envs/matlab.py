@@ -109,6 +109,21 @@ class DevWTK(DeviatableEnv):
         return self.delta_0
 
 
+class DevWTKBaseline(DevWTK):
+    def instantiate(self, delta, agent):
+        self.eng.workspace['name'] = f'WTK_{agent.type}_breach'
+        if agent.type == 'RL':
+            self.eng.workspace['agent'] = self.eng.load(agent.path)['agent']
+        else:
+            self.eng.workspace['agent'] = 0
+        self.eng.workspace['in_rate'] = delta[0]
+        self.eng.workspace['out_rate'] = delta[1]
+        self.eng.workspace['in_rate_range'] = matlab.double(self.in_rates)
+        self.eng.workspace['out_rate_range'] = matlab.double(self.out_rates)
+        self.eng.InitWTK_baseline(nargout=0)
+        return self.eng.workspace['model']
+
+
 class DevAFC(DeviatableEnv):
     def __init__(self, eng, MAF_sensor_tols, AF_sensor_tols, delta_0):
         self.eng = eng
