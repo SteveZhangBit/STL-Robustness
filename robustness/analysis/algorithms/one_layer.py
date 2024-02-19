@@ -40,6 +40,7 @@ class OneLayerSolver(Solver):
         deltas = np.array([[self.sys_evaluator.get_params(n)[i] for n in self.param_names] for i in range(len(obj_values))])
         distances = np.array([problem.dist.eval_dist(delta) for delta in deltas])
 
+        obj_values -= distances
         negative_obj_idx = np.where(obj_values < 0)
         obj_with_negative = obj_values[negative_obj_idx]
 

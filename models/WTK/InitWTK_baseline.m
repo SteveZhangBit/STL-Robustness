@@ -9,6 +9,12 @@ h_ref_max = 15;
 % out_rate = 0.1;
 % in_rate_range = [0.01 0.5];
 % out_rate_range = [0.01 0.2];
+global dev_names;
+global dev_0;
+global dev_bounds;
+dev_names = {'in_rate', 'out_rate'};
+dev_0 = [in_rate; out_rate];
+dev_bounds = [in_rate_range; out_rate_range];
 % RL parameters
 % desire_WL = 10;
 
@@ -29,7 +35,7 @@ end
 model.SetParamRanges('in_rate', in_rate_range);
 model.SetParamRanges('out_rate', out_rate_range);
 
-% pb = FalsificationProblem(model, STL_Formula('phi','(sqrt((in_rate - 0.25)^2 + (out_rate - 0.1)^2) > 0) and alw_[5,5.9](abs(h_error[t]) < 1) and alw_[11,11.9](abs(h_error[t]) < 1) and alw_[17,17.9](abs(h_error[t]) < 1) and alw_[23,23.9](abs(h_error[t]) < 1)'));
+% pb = MyFalsificationProblem(dev_names, dev_0, dev_bounds, model, STL_Formula('phi','alw_[5,5.9](abs(h_error[t]) < 1) and alw_[11,11.9](abs(h_error[t]) < 1) and alw_[17,17.9](abs(h_error[t]) < 1) and alw_[23,23.9](abs(h_error[t]) < 1)'));
 % pb.max_obj_eval = 30;
 % pb.StopAtFalse = false;
 % pb.setup_solver('cmaes');

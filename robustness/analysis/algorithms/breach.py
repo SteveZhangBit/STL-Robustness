@@ -22,7 +22,8 @@ class BreachSystemEvaluator(SystemEvaluator):
 
         self.eng.addpath(os.path.dirname(__file__))
         obj_best, obj_values, all_signal_values, violation_signal_values, all_param_values, violation_param_values = \
-            self.eng.breach_falsification(env, str(self.phi), trials, max_evals, nargout=6)
+            self._breach_falsification(env, trials, max_evals)
+        
         self.obj_values = np.array(obj_values)[0]
         self.all_signal_values = all_signal_values
         self.violation_signal_values = violation_signal_values
@@ -30,6 +31,9 @@ class BreachSystemEvaluator(SystemEvaluator):
         self.violation_param_values = {k: np.array(violation_param_values[k])[0] for k in violation_param_values.keys()}
         return obj_best, None
 
+    def _breach_falsification(self, env, trials, max_evals):
+        return self.eng.breach_falsification(env, str(self.phi), trials, max_evals, nargout=6)
+    
     def get_obj_values(self):
         return self.obj_values
     
@@ -47,3 +51,8 @@ class BreachSystemEvaluator(SystemEvaluator):
 
     def get_params(self, name):
         return self.all_param_values[name]
+
+
+class BreachOneLayerSystemEvaluator(BreachSystemEvaluator):
+    def _breach_falsification(self, env, trials, max_evals):
+        return self.eng.one_layer_breach_falsification(env, str(self.phi), trials, max_evals, nargout=6)
