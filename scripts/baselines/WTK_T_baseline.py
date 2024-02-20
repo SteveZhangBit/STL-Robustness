@@ -34,14 +34,14 @@ phi = BreachSTL('alw_[5,5.9](abs(h_error[t]) < 1) and ' + \
                 'alw_[23,23.9](abs(h_error[t]) < 1)')
 
 prob = Problem(env, agent, phi, L2Norm(env))
-sys_eval = BreachOneLayerSystemEvaluator(eng, phi, {'restarts': 0, 'evals': 10})
+sys_eval = BreachOneLayerSystemEvaluator(eng, phi, {'restarts': 0, 'evals': 100})
 
-solver = OneLayerSolver(sys_eval, ['in_rate', 'out_rate'], {'restarts': 0, 'evals': 10})
+solver = OneLayerSolver(sys_eval, ['in_rate', 'out_rate'], {'restarts': 0, 'evals': 100})
 evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 
 print('Find violations by OneLayer...')
-records_ol = experiment.record_min_violations(out_dir='data/WTK/traditional/ol', runs=1)
+records_ol = experiment.record_min_violations(out_dir='data/WTK/traditional/ol')
 records_ol, violations_ol = experiment.summarize_violations(records_ol, 'data/WTK/traditional/ol')
 # Plot the samples
 for i in range(len(records_ol)):
