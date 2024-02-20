@@ -77,7 +77,7 @@ if __name__ == "__main__":
     phi = "(always(x < 0.500125 and y < 0.575))" 
     specification = RTAMTDense(phi, {"x": 0, "y": 1})
     optimizer = DualAnnealing()
-    options = Options(runs=1, iterations=50, interval=(0, 1), static_parameters=[(5.0,60.0),(0.2,0.8),(-0.1,0.1),(-0.1,0.1),(2.35619449, 3.92699082)])
+    options = Options(runs=1, iterations=100, interval=(0, 1), static_parameters=[(5.0,60.0),(0.2,0.8),(-0.1,0.1),(-0.1,0.1),(2.35619449, 3.92699082)])
     result = staliro(car_run_model, specification, optimizer, options)
     for run in result.runs:
         for evaluation in run.history:

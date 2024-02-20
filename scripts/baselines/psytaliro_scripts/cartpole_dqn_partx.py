@@ -29,7 +29,9 @@ from robustness.analysis.utils import L2Norm, normalize
 from robustness.envs.cartpole import DevCartPole, SafetyProp, SafetyProp2
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
-
+from partx.partxInterface.staliroIntegration import PartX
+from partx.bayesianOptimization.internalBO import InternalBO
+from partx.gprInterface.internalGPR import InternalGPR
 CartpoleDataT = ModelResult[List[float], None]
 
 
@@ -69,26 +71,33 @@ def cartmodel(static: Sequence[float], times: SignalTimes, signals: SignalValues
 
 
 if __name__ == "__main__":
+    '''
+    TODO not exactly sure hwo to only search for control inputs
+    '''
     phi = "(always(x <= 0.75 and y <= 0.75))" 
     specification = RTAMTDense(phi, {"x": 0, "y": 1})
+    results_folder = "Cart_Partx"
+    MAX_BUDGET = 2000
+    NUMBER_OF_MACRO_REPLICATIONS = 10
+
     optimizer = DualAnnealing()
-    options = Options(runs=1, iterations=100, interval=(0, 1), static_parameters=[(0.0,2.0),(0.0,20.0),(-0.05,0.05),(-0.05,0.05),(-0.05,0.05), (-0.05,0.05)])
+    options = Options(runs=1, iterations=50, interval=(0, 1), static_parameters=[(0.0,2.0),(0.0,20.0),(-0.05,0.05),(-0.05,0.05),(-0.05,0.05), (-0.05,0.05)])
     result = staliro(cartmodel, specification, optimizer, options)
-    for run in result.runs:
-        for evaluation in run.history:
-           print(f"Sample: {evaluation.sample} -> Cost: {evaluation.cost}")
-    best_sample = worst_eval(best_run(result)).sample
-    masses = [0.1, 2.0]
-    forces = [1.0, 20.0]
-    env = DevCartPole(masses, forces, (1.0, 10.0))
-    agent = DQN('/usr0/home/parvk/cj_project/STL-Robustness/models/cartpole/best_dqn')
-    phi = SafetyProp()
-    episode_len = 200
-    # set the deviation params first
-    env, x0bounds = env.instantiate(best_sample[0:2])
-    # set the initial state after
-    obs = env.reset_to(best_sample[2:6]) 
-    for _ in range(episode_len):
-        action = agent.next_action(obs)
-        obs, reward, _, _ = env.step(action) 
-        env.render()
+    # for run in result.runs:
+    #     for evaluation in run.history:
+    #        print(f"Sample: {evaluation.sample} -> Cost: {evaluation.cost}")
+    # best_sample = worst_eval(best_run(result)).sample
+    # masses = [0.1, 2.0]
+    # forces = [1.0, 20.0]
+    # env = DevCartPole(masses, forces, (1.0, 10.0))
+    # agent = DQN('/usr0/home/parvk/cj_project/STL-Robustness/models/cartpole/best_dqn')
+    # phi = SafetyProp()
+    # episode_len = 200
+    # # set the deviation params first
+    # env, x0bounds = env.instantiate(best_sample[0:2])
+    # # set the initial state after
+    # obs = env.reset_to(best_sample[2:6]) 
+    # for _ in range(episode_len):
+    #     action = agent.next_action(obs)
+    #     obs, reward, _, _ = env.step(action) 
+    #     env.render()
