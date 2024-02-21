@@ -30,7 +30,8 @@ from robustness.analysis.utils import L2Norm, normalize
 from robustness.envs.lunar_lander import DevLunarLander, SafetyProp, SafetyProp2
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
-
+from matplotlib import pyplot as plt
+import pandas as pd
 LunarDataT = ModelResult[List[float], None]
 
 
@@ -73,23 +74,45 @@ def lunarmodel(static: Sequence[float], times: SignalTimes, signals: SignalValue
    return BasicResult(simulation_trace)
 
 
+def plot_csv_samples(filename, experiment):
+    data = pd.read_csv(filename)
+    samples = [([row['d1'], row['d2']], row['Cost']) for index, row in data.iterrows()]
+    experiment.plot_samples(samples, 'Wind', 'Turbulence', '/usr0/home/parvk/cj_project/STL-Robustness/data/lunar-lander-ppo', n=20)
+    plt.savefig(f'baseline_results/lunar_lander_ppo.png', bbox_inches='tight')
 
 
 if __name__ == "__main__":
-    phi = "(always(a < 0.625 and dx < 0.1) or d > 0.4)" 
-    specification = RTAMTDense(phi, {"a": 0, "dx": 1, "d":2})
-    optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
-    options = Options(runs=100, iterations=100, interval=(0, 1), static_parameters=[(0.0,20.0),(0.0,2.0),(-3.0,3.0),(-3.0,3.0)])
-    result = staliro(lunarmodel, specification, optimizer, options)
-    import csv 
     filename = "baseline_results/lunar_lander_data.csv"
-    with open(filename, 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['d1','d2', 'i1', 'i2', 'Cost'])
-        for run in result.runs:
-            for evaluation in run.history:
-                #print(f"Sample: {evaluation.sample} -> Cost: {evaluation.cost}")
+    if not os.path.isfile(filename):
+        phi = "(always(a < 0.625 and dx < 0.1) or d > 0.3)" 
+        specification = RTAMTDense(phi, {"a": 0, "dx": 1, "d":2})
+        optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
+        options = Options(runs=100, iterations=100, interval=(0, 1), static_parameters=[(0.0,20.0),(0.0,2.0),(-3.0,3.0),(-3.0,3.0)])
+        result = staliro(lunarmodel, specification, optimizer, options)
+        import csv 
+        with open(filename, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['d1','d2', 'i1', 'i2', 'Cost'])
+            for run in result.runs:
+                evaluation = worst_eval(run)
                 writer.writerow([evaluation.sample[0],evaluation.sample[1], evaluation.sample[2],evaluation.sample[3], evaluation.cost])
+    else:
+        print('Data found, plotting.... \n')
+        # lot of extra code for plotting tbh
+        winds = [0.0, 20.0]
+        turbulences = [0.0, 2.0]
+        env = DevLunarLander(winds, turbulences, (0.0, 0.0))
+        agent = PPO('/usr0/home/parvk/cj_project/STL-Robustness/models/lunar-lander/ppo.zip')
+        phi = SafetyProp()
+
+        # Create problem and solver
+        prob = Problem(env, agent, phi, L2Norm(env))
+        sys_eval = CMASystemEvaluator(0.4, phi, {'timeout': 1, 'episode_len': 300})
+        # Use CMA
+        solver = CMASolver(0.2, sys_eval)
+        evaluator = Evaluator(prob, solver)
+        experiment = Experiment(evaluator)
+        plot_csv_samples(filename, experiment)
     # the following code is to visualize the deviation
     # best_sample = worst_eval(best_run(result)).sample
     # winds = [0.0, 20.0]

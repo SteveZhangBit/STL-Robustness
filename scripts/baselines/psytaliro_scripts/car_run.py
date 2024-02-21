@@ -11,7 +11,7 @@ from typing import List, Sequence
 import plotly.graph_objects as go
 from staliro.core import BasicResult, ModelResult, Trace, best_eval, best_run, worst_eval, worst_run
 from staliro.models import SignalTimes, SignalValues, blackbox
-from staliro.optimizers import DualAnnealing
+from staliro.optimizers import DualAnnealing, Behavior
 from staliro.options import Options
 from staliro.specifications import TaliroPredicate, TpTaliro
 from staliro.staliro import simulate_model, staliro
@@ -30,7 +30,8 @@ from robustness.analysis.utils import L2Norm, normalize
 from robustness.envs.car_run import DevCarRun, SafetyProp, SafetyProp2
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
-
+import pandas as pd
+from matplotlib import pyplot as plt
 CarRunDataT = ModelResult[List[float], None]
 
 
@@ -44,6 +45,12 @@ def car_run_model(static: Sequence[float], times: SignalTimes, signals: SignalVa
    agent = PPOVanilla(load_dir)
    phi = SafetyProp()
    episode_len = 200
+   
+   # this is only for distance
+   delta = normalize(static[0:2], env.dev_bounds)
+   delta_0 = normalize(env.delta_0, env.dev_bounds)
+   dist = np.sqrt( np.sum((delta - delta_0) ** 2))
+   
    # set the deviation params first (steering and speed)
    env, x0bounds = env.instantiate(static[0:2])
    # set the initial state after
@@ -54,14 +61,14 @@ def car_run_model(static: Sequence[float], times: SignalTimes, signals: SignalVa
    v_signal = normalize(tot_v_signal, np.asarray([-10,10]))
    check_y = normalize(0.25, np.asarray([env.observation_space.low[1], env.observation_space.high[1]]))
    check_v = normalize(1.5, np.asarray([-10, 10]))
-   simulation_state.append(np.array([y_signal, v_signal]))
+   simulation_state.append(np.array([y_signal, v_signal, dist]))
    for _ in range(episode_len):
         action = agent.next_action(obs)
         obs, reward, _, _ = env.step(action)
         y_signal = normalize(np.abs(obs[1]), np.asarray([env.observation_space.low[1], env.observation_space.high[1]]))
         tot_v_signal = np.clip(np.linalg.norm([obs[2], obs[3]]), -10, 10)
         v_signal = normalize(tot_v_signal, np.asarray([-10, 10]))
-        simulation_state.append(np.array([y_signal, v_signal]))
+        simulation_state.append(np.array([y_signal, v_signal, dist]))
    simulation_state = np.array(simulation_state)
    states = simulation_state.T
    
@@ -70,33 +77,66 @@ def car_run_model(static: Sequence[float], times: SignalTimes, signals: SignalVa
    return BasicResult(simulation_trace)
 
 
+def plot_csv_samples(filename, experiment):
+    data = pd.read_csv(filename)
+    samples = [([row['d1'], row['d2']], row['Cost']) for index, row in data.iterrows()]
+    experiment.plot_samples(samples, 'Speed', 'Steering', '/usr0/home/parvk/cj_project/STL-Robustness/data/car-run-ppo', n=20)
+    plt.savefig(f'baseline_results/car_run_ppo.png', bbox_inches='tight')
+
 
 
 
 if __name__ == "__main__":
-    phi = "(always(x < 0.500125 and y < 0.575))" 
-    specification = RTAMTDense(phi, {"x": 0, "y": 1})
-    optimizer = DualAnnealing()
-    options = Options(runs=1, iterations=100, interval=(0, 1), static_parameters=[(5.0,60.0),(0.2,0.8),(-0.1,0.1),(-0.1,0.1),(2.35619449, 3.92699082)])
-    result = staliro(car_run_model, specification, optimizer, options)
-    for run in result.runs:
-        for evaluation in run.history:
-           print(f"Sample: {evaluation.sample} -> Cost: {evaluation.cost}")
-    best_sample = worst_eval(best_run(result)).sample
-    print(best_sample)
-    load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_run_ppo_vanilla/model_save/model.pt'
-    speed = [5.0, 60.0]
-    steering = [0.2, 0.8]
-    env = DevCarRun(load_dir, speed, steering)
-    agent = PPOVanilla(load_dir)
-    phi = SafetyProp()
-    episode_len = 200
-    # set the deviation params first (steering and speed)
-    env, x0bounds = env.instantiate(best_sample[0:2], render=True)
-    # set the initial state after
-    obs = env.reset_to(best_sample[2:5]) 
-    for _ in range(episode_len):
-        action = agent.next_action(obs)
-        obs, reward, _, _ = env.step(action)
-        time.sleep(0.2) 
-        env.render()
+    filename = "baseline_results/car_run_data.csv"
+    if not os.path.isfile(filename):
+        phi = "(always(x < 0.500125 and y < 0.575) or d > 0.3)" 
+        specification = RTAMTDense(phi, {"x": 0, "y": 1, "d": 2})
+        optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
+        options = Options(runs=2, iterations=2, interval=(0, 1), static_parameters=[(5.0,60.0),(0.2,0.8),(-0.1,0.1),(-0.1,0.1),(2.35619449, 3.92699082)])
+        result = staliro(car_run_model, specification, optimizer, options)
+        import csv 
+        with open(filename, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['d1','d2', 'i1', 'i2', 'i3', 'Cost'])
+            for run in result.runs:
+                evaluation = worst_eval(run)
+                writer.writerow([evaluation.sample[0],evaluation.sample[1], evaluation.sample[2],evaluation.sample[3], evaluation.sample[4], evaluation.cost])
+    else:
+        print('Data found, plotting.... \n')
+        # lot of extra code for plotting tbh
+        load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_run_ppo_vanilla/model_save/model.pt'
+        speed = [5.0, 60.0]
+        steering = [0.2, 0.8]
+        env = DevCarRun(load_dir, speed, steering)
+        agent = PPOVanilla(load_dir)
+        phi = SafetyProp()
+        episode_len = 200
+
+        # Create problem and solver
+        prob = Problem(env, agent, phi, L2Norm(env))
+        sys_eval = CMASystemEvaluator(0.4, phi, {'timeout': 1, 'episode_len': 200})
+        # Use CMA
+        solver = CMASolver(0.2, sys_eval)
+        evaluator = Evaluator(prob, solver)
+        experiment = Experiment(evaluator)
+        plot_csv_samples(filename, experiment)
+            
+    # the following code is to visualize the deviation
+    # best_sample = worst_eval(best_run(result)).sample
+    # print(best_sample)
+    # load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_run_ppo_vanilla/model_save/model.pt'
+    # speed = [5.0, 60.0]
+    # steering = [0.2, 0.8]
+    # env = DevCarRun(load_dir, speed, steering)
+    # agent = PPOVanilla(load_dir)
+    # phi = SafetyProp()
+    # episode_len = 200
+    # # set the deviation params first (steering and speed)
+    # env, x0bounds = env.instantiate(best_sample[0:2], render=True)
+    # # set the initial state after
+    # obs = env.reset_to(best_sample[2:5]) 
+    # for _ in range(episode_len):
+    #     action = agent.next_action(obs)
+    #     obs, reward, _, _ = env.step(action)
+    #     time.sleep(0.2) 
+    #     env.render()

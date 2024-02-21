@@ -10,7 +10,7 @@ from typing import List, Sequence
 import plotly.graph_objects as go
 from staliro.core import BasicResult, ModelResult, Trace, best_eval, best_run, worst_eval, worst_run
 from staliro.models import SignalTimes, SignalValues, blackbox
-from staliro.optimizers import DualAnnealing
+from staliro.optimizers import DualAnnealing, Behavior
 from staliro.options import Options
 from staliro.specifications import TaliroPredicate, TpTaliro
 from staliro.staliro import simulate_model, staliro
@@ -73,7 +73,7 @@ def cartmodel(static: Sequence[float], times: SignalTimes, signals: SignalValues
 def plot_csv_samples(filename, experiment):
     data = pd.read_csv(filename)
     samples = [([row['d1'], row['d2']], row['Cost']) for index, row in data.iterrows()]
-    experiment.plot_samples(samples, 'Wind', 'Turbulence', '/usr0/home/parvk/cj_project/STL-Robustness/data/cartpole-dqn', n=20)
+    experiment.plot_samples(samples, 'Mass', 'Force', '/usr0/home/parvk/cj_project/STL-Robustness/data/cartpole-dqn', n=20)
     plt.savefig(f'baseline_results/cartpole_dqn_d2.png', bbox_inches='tight')
 
 if __name__ == "__main__":
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         print('Running baseline \n')
         phi = "(always(x <= 0.75 and y <= 0.75) or d > 0.35)" 
         specification = RTAMTDense(phi, {"x": 0, "y": 1, 'd':2})
-        optimizer = DualAnnealing()
+        optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
         options = Options(runs=100, iterations=100, interval=(0, 1), static_parameters=[(0.0,2.0),(0.0,20.0),(-0.05,0.05),(-0.05,0.05),(-0.05,0.05), (-0.05,0.05)])
         result = staliro(cartmodel, specification, optimizer, options)
         import csv 
