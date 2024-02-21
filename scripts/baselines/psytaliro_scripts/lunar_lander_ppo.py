@@ -76,35 +76,36 @@ def lunarmodel(static: Sequence[float], times: SignalTimes, signals: SignalValue
 
 
 if __name__ == "__main__":
-    phi = "(always(a < 0.625 and dx < 0.1) or d > 0.5)" 
+    phi = "(always(a < 0.625 and dx < 0.1) or d > 0.4)" 
     specification = RTAMTDense(phi, {"a": 0, "dx": 1, "d":2})
     optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
-    options = Options(runs=1, iterations=100, interval=(0, 1), static_parameters=[(0.0,20.0),(0.0,2.0),(-3.0,3.0),(-3.0,3.0)])
+    options = Options(runs=100, iterations=100, interval=(0, 1), static_parameters=[(0.0,20.0),(0.0,2.0),(-3.0,3.0),(-3.0,3.0)])
     result = staliro(lunarmodel, specification, optimizer, options)
     import csv 
     filename = "baseline_results/lunar_lander_data.csv"
     with open(filename, 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['Sample', 'Cost'])
+        writer.writerow(['d1','d2', 'i1', 'i2', 'Cost'])
         for run in result.runs:
             for evaluation in run.history:
-                print(f"Sample: {evaluation.sample} -> Cost: {evaluation.cost}")
-                writer.writerow([evaluation.sample, evaluation.cost])
-    best_sample = worst_eval(best_run(result)).sample
-    winds = [0.0, 20.0]
-    turbulences = [0.0, 2.0]
-    env = DevLunarLander(winds, turbulences, (0.0, 0.0))
-    agent = PPO('/usr0/home/parvk/cj_project/STL-Robustness/models/lunar-lander/ppo.zip')
-    episode_len = 300
-    delta = normalize(best_sample[0:2], env.dev_bounds)
-    delta_0 = normalize(env.delta_0, env.dev_bounds)
-    dist = np.sqrt( np.sum((delta - delta_0) ** 2) )
-    print(dist)
-    # set the deviation params first
-    env, x0bounds = env.instantiate(best_sample[0:2])
-    # set the initial state after
-    obs = env.reset_to(best_sample[2:4]) 
-    for _ in range(episode_len):
-        action = agent.next_action(obs)
-        obs, reward, _, _ = env.step(action) 
-        env.render()
+                #print(f"Sample: {evaluation.sample} -> Cost: {evaluation.cost}")
+                writer.writerow([evaluation.sample[0],evaluation.sample[1], evaluation.sample[2],evaluation.sample[3], evaluation.cost])
+    # the following code is to visualize the deviation
+    # best_sample = worst_eval(best_run(result)).sample
+    # winds = [0.0, 20.0]
+    # turbulences = [0.0, 2.0]
+    # env = DevLunarLander(winds, turbulences, (0.0, 0.0))
+    # agent = PPO('/usr0/home/parvk/cj_project/STL-Robustness/models/lunar-lander/ppo.zip')
+    # episode_len = 300
+    # delta = normalize(best_sample[0:2], env.dev_bounds)
+    # delta_0 = normalize(env.delta_0, env.dev_bounds)
+    # dist = np.sqrt( np.sum((delta - delta_0) ** 2) )
+    # print(dist)
+    # # set the deviation params first
+    # env, x0bounds = env.instantiate(best_sample[0:2])
+    # # set the initial state after
+    # obs = env.reset_to(best_sample[2:4]) 
+    # for _ in range(episode_len):
+    #     action = agent.next_action(obs)
+    #     obs, reward, _, _ = env.step(action) 
+    #     env.render()
