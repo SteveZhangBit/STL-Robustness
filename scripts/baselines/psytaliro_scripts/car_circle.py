@@ -34,15 +34,14 @@ import pandas as pd
 from matplotlib import pyplot as plt
 CarRunDataT = ModelResult[List[float], None]
 
-
+load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_circle_ppo_vanilla/model_save/model.pt'
+agent = PPOVanilla(load_dir)
 
 @blackbox()
 def car_circle_model(static: Sequence[float], times: SignalTimes, signals: SignalValues) -> CarRunDataT:
-   load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_circle_ppo_vanilla/model_save/model.pt'
    speed = [5.0, 60.0]
    steering = [0.2, 0.8]
    env = DevCarCircle(load_dir, speed, steering)
-   agent = PPOVanilla(load_dir)
    phi = SafetyProp()
    episode_len = 300
 
@@ -77,6 +76,8 @@ def plot_csv_samples(filename, experiment):
     samples = [([row['d1'], row['d2']], row['Cost']) for index, row in data.iterrows()]
     experiment.plot_samples(samples, 'Speed', 'Steering', '/usr0/home/parvk/cj_project/STL-Robustness/data/car-circle-ppo', n=20)
     plt.savefig(f'baseline_results/car_circle_ppo.png', bbox_inches='tight')
+    min_cost_row = data.loc[data['Cost'].idxmin()]
+    return min_cost_row
 
 
 if __name__ == "__main__":
@@ -111,23 +112,15 @@ if __name__ == "__main__":
         solver = CMASolver(0.2, sys_eval)
         evaluator = Evaluator(prob, solver)
         experiment = Experiment(evaluator)
-        plot_csv_samples(filename, experiment)
+        best_sample = plot_csv_samples(filename, experiment)
+        print(best_sample)
+        # set the deviation params first (steering and speed)
+        env, x0bounds = env.instantiate(best_sample[0:2], render=True)
+        # set the initial state after
+        obs = env.reset_to(best_sample[2:4]) 
+        for _ in range(episode_len):
+            action = agent.next_action(obs)
+            obs, reward, _, _ = env.step(action)
+            time.sleep(0.2) 
+            env.render()
     
-    # best_sample = worst_eval(best_run(result)).sample
-    # print(best_sample)
-    # load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_circle_ppo_vanilla/model_save/model.pt'
-    # speed = [5.0, 60.0]
-    # steering = [0.2, 0.8]
-    # env = DevCarCircle(load_dir, speed, steering)
-    # agent = PPOVanilla(load_dir)
-    # phi = SafetyProp()
-    # episode_len = 300
-    # # set the deviation params first (steering and speed)
-    # env, x0bounds = env.instantiate(best_sample[0:2], render=True)
-    # # set the initial state after
-    # obs = env.reset_to(best_sample[2:4]) 
-    # for _ in range(episode_len):
-    #     action = agent.next_action(obs)
-    #     obs, reward, _, _ = env.step(action)
-    #     time.sleep(0.2) 
-    #     env.render()

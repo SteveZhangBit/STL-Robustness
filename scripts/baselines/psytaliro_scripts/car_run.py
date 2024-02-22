@@ -34,16 +34,14 @@ import pandas as pd
 from matplotlib import pyplot as plt
 CarRunDataT = ModelResult[List[float], None]
 
-
+load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_run_ppo_vanilla/model_save/model.pt'
+agent = PPOVanilla(load_dir)
 
 @blackbox()
 def car_run_model(static: Sequence[float], times: SignalTimes, signals: SignalValues) -> CarRunDataT:
-   load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_run_ppo_vanilla/model_save/model.pt'
    speed = [5.0, 60.0]
    steering = [0.2, 0.8]
    env = DevCarRun(load_dir, speed, steering)
-   agent = PPOVanilla(load_dir)
-   phi = SafetyProp()
    episode_len = 200
    
    # this is only for distance
@@ -82,6 +80,8 @@ def plot_csv_samples(filename, experiment):
     samples = [([row['d1'], row['d2']], row['Cost']) for index, row in data.iterrows()]
     experiment.plot_samples(samples, 'Speed', 'Steering', '/usr0/home/parvk/cj_project/STL-Robustness/data/car-run-ppo', n=20)
     plt.savefig(f'baseline_results/car_run_ppo.png', bbox_inches='tight')
+    min_cost_row = data.loc[data['Cost'].idxmin()]
+    return min_cost_row
 
 
 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         phi = "(always(x < 0.500125 and y < 0.575) or d > 0.3)" 
         specification = RTAMTDense(phi, {"x": 0, "y": 1, "d": 2})
         optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
-        options = Options(runs=2, iterations=2, interval=(0, 1), static_parameters=[(5.0,60.0),(0.2,0.8),(-0.1,0.1),(-0.1,0.1),(2.35619449, 3.92699082)])
+        options = Options(runs=10, iterations=10, interval=(0, 1), static_parameters=[(5.0,60.0),(0.2,0.8),(-0.1,0.1),(-0.1,0.1),(2.35619449, 3.92699082)])
         result = staliro(car_run_model, specification, optimizer, options)
         import csv 
         with open(filename, 'w', newline='') as file:
@@ -119,24 +119,15 @@ if __name__ == "__main__":
         solver = CMASolver(0.2, sys_eval)
         evaluator = Evaluator(prob, solver)
         experiment = Experiment(evaluator)
-        plot_csv_samples(filename, experiment)
+        best_sample = plot_csv_samples(filename, experiment)
+        print(best_sample)
+        # set the deviation params first (steering and speed)
+        env, x0bounds = env.instantiate(best_sample[0:2], render=True)
+        # set the initial state after
+        obs = env.reset_to(best_sample[2:5]) 
+        for _ in range(episode_len):
+            action = agent.next_action(obs)
+            obs, reward, _, _ = env.step(action)
+            time.sleep(0.2) 
+            env.render()
             
-    # the following code is to visualize the deviation
-    # best_sample = worst_eval(best_run(result)).sample
-    # print(best_sample)
-    # load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_run_ppo_vanilla/model_save/model.pt'
-    # speed = [5.0, 60.0]
-    # steering = [0.2, 0.8]
-    # env = DevCarRun(load_dir, speed, steering)
-    # agent = PPOVanilla(load_dir)
-    # phi = SafetyProp()
-    # episode_len = 200
-    # # set the deviation params first (steering and speed)
-    # env, x0bounds = env.instantiate(best_sample[0:2], render=True)
-    # # set the initial state after
-    # obs = env.reset_to(best_sample[2:5]) 
-    # for _ in range(episode_len):
-    #     action = agent.next_action(obs)
-    #     obs, reward, _, _ = env.step(action)
-    #     time.sleep(0.2) 
-    #     env.render()
