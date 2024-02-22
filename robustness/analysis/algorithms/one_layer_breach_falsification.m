@@ -5,7 +5,7 @@ function [obj_best, obj_values, all_signal_values, violation_signal_values, all_
     global dev_bounds;
     
     obj_best = inf;
-    obj_values = [];
+    obj_values = zeros(trials, evals);
   
     all_signal_values = struct();
     violation_signal_values = struct();
@@ -22,7 +22,7 @@ function [obj_best, obj_values, all_signal_values, violation_signal_values, all_
       falsif_pb.solve();
   
       obj_best = min(obj_best, falsif_pb.obj_best);
-      obj_values = falsif_pb.obj_log;
+      obj_values(n, :) = falsif_pb.obj_log;
   
       traces = falsif_pb.GetLog;
     %   summary = traces.GetSummary;
@@ -47,7 +47,11 @@ function [obj_best, obj_values, all_signal_values, violation_signal_values, all_
   
       param_names = traces.GetParamList;
       for i = 1:length(param_names)
-        all_param_values.(param_names{i}) = traces.GetParam(param_names{i});
+        if isfield(all_param_values, param_names{i})
+          all_param_values.(param_names{i}) = [all_param_values.(param_names{i}); traces.GetParam(param_names{i})];
+        else
+          all_param_values.(param_names{i}) = traces.GetParam(param_names{i});
+        end
         % if isempty(violation_indices) == false
         %   violation_param_values.(param_names{i}) = traces.GetParam(param_names{i}, violation_indices);
         % end

@@ -24,11 +24,11 @@ class BreachSystemEvaluator(SystemEvaluator):
         obj_best, obj_values, all_signal_values, violation_signal_values, all_param_values, violation_param_values = \
             self._breach_falsification(env, trials, max_evals)
         
-        self.obj_values = np.array(obj_values)[0]
+        self.obj_values = np.array(obj_values)
         self.all_signal_values = all_signal_values
         self.violation_signal_values = violation_signal_values
-        self.all_param_values = {k: np.array(all_param_values[k])[0] for k in all_param_values.keys()}
-        self.violation_param_values = {k: np.array(violation_param_values[k])[0] for k in violation_param_values.keys()}
+        self.all_param_values = {k: np.array(all_param_values[k]) for k in all_param_values.keys()}
+        self.violation_param_values = {k: np.array(violation_param_values[k]) for k in violation_param_values.keys()}
         return obj_best, None
 
     def _breach_falsification(self, env, trials, max_evals):

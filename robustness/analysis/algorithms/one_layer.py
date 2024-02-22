@@ -36,8 +36,8 @@ class OneLayerSolver(Solver):
     
     def _run_one_layer(self, problem: Problem):
         self.sys_evaluator.eval_sys(problem.env.get_delta_0(), problem)
-        obj_values = self.sys_evaluator.get_obj_values()
-        deltas = np.array([[self.sys_evaluator.get_params(n)[i] for n in self.param_names] for i in range(len(obj_values))])
+        obj_values = self.sys_evaluator.get_obj_values().flatten()
+        deltas = np.array(list(zip(*[self.sys_evaluator.get_params(n).flatten() for n in self.param_names])))
         distances = np.array([problem.dist.eval_dist(delta) for delta in deltas])
 
         obj_values -= distances

@@ -1,7 +1,7 @@
 function [obj_best, obj_values, all_signal_values, violation_signal_values, all_param_values, violation_param_values] = breach_falsification(env, phi, trials, evals)
 
   obj_best = inf;
-  obj_values = [];
+  obj_values = zeros(trials, evals);
 
   all_signal_values = struct();
   violation_signal_values = struct();
@@ -18,11 +18,11 @@ function [obj_best, obj_values, all_signal_values, violation_signal_values, all_
     falsif_pb.solve();
 
     obj_best = min(obj_best, falsif_pb.obj_best);
-    obj_values = falsif_pb.obj_log;
+    obj_values(n, :) = falsif_pb.obj_log;
 
     traces = falsif_pb.GetLog;
-    summary = traces.GetSummary;
-    violation_indices = find(summary.num_violations_per_trace > 0);
+    % summary = traces.GetSummary;
+    % violation_indices = find(summary.num_violations_per_trace > 0);
 
     signal_names = traces.GetSignalList;
     for i = 1:length(signal_names)
@@ -32,21 +32,30 @@ function [obj_best, obj_values, all_signal_values, violation_signal_values, all_
         all_signal_values.(signal_names{i}) = traces.GetSignalValues(signal_names{i});
       end
 
-      if isempty(violation_indices) == false
-        if isfield(violation_signal_values, signal_names{i})
-          violation_signal_values.(signal_names{i}) = [violation_signal_values.(signal_names{i}); traces.GetSignalValues(signal_names{i}, violation_indices)];
-        else
-          violation_signal_values.(signal_names{i}) = traces.GetSignalValues(signal_names{i}, violation_indices);
-        end
-      end
+      % if isempty(violation_indices) == false
+      %   if isfield(violation_signal_values, signal_names{i})
+      %     violation_signal_values.(signal_names{i}) = [violation_signal_values.(signal_names{i}); traces.GetSignalValues(signal_names{i}, violation_indices)];
+      %   else
+      %     violation_signal_values.(signal_names{i}) = traces.GetSignalValues(signal_names{i}, violation_indices);
+      %   end
+      % end
     end
 
     param_names = traces.GetParamList;
     for i = 1:length(param_names)
-      all_param_values.(param_names{i}) = traces.GetParam(param_names{i});
-      if isempty(violation_indices) == false
-        violation_param_values.(param_names{i}) = traces.GetParam(param_names{i}, violation_indices);
+      if isfield(all_param_values, param_names{i})
+        all_param_values.(param_names{i}) = [all_param_values.(param_names{i}); traces.GetParam(param_names{i})];
+      else
+        all_param_values.(param_names{i}) = traces.GetParam(param_names{i});
       end
+      
+      % if isempty(violation_indices) == false
+      %   if isfield(violation_param_values, param_names{i})
+      %     violation_param_values.(param_names{i}) = [violation_param_values.(param_names{i}); traces.GetParam(param_names{i}, violation_indices)];
+      %   else
+      %     violation_param_values.(param_names{i}) = traces.GetParam(param_names{i}, violation_indices);
+      %   end
+      % end
     end
   end
 
