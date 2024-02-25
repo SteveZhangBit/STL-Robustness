@@ -148,3 +148,18 @@ class DevAFC(DeviatableEnv):
     
     def get_delta_0(self):
         return self.delta_0
+
+
+class DevAFCBaseline(DevAFC):
+    def instantiate(self, delta, agent):
+        self.eng.workspace['name'] = f'AFC_{agent.type}_breach'
+        if agent.type == 'RL':
+            self.eng.workspace['agent'] = self.eng.load(agent.path)['agent']
+        else:
+            self.eng.workspace['agent'] = 0
+        self.eng.workspace['MAF_sensor_tol'] = delta[0]
+        self.eng.workspace['AF_sensor_tol'] = delta[1]
+        self.eng.workspace['MAF_sensor_tol_range'] = matlab.double(self.MAF_sensor_tols)
+        self.eng.workspace['AF_sensor_tol_range'] = matlab.double(self.AF_sensor_tols)
+        self.eng.InitAFC_baseline(nargout=0)
+        return self.eng.workspace['model']
