@@ -38,8 +38,8 @@ LunarDataT = ModelResult[List[float], None]
 
 @blackbox()
 def lunarmodel(static: Sequence[float], times: SignalTimes, signals: SignalValues) -> LunarDataT:
-   winds = [0.0, 20.0]
-   turbulences = [0.0, 2.0]
+   winds = [0.0, 10.0]  
+   turbulences = [0.0, 1.0]
    env = DevLunarLander(winds, turbulences, (0.0, 0.0))
    agent = PPO('/usr0/home/parvk/cj_project/STL-Robustness/models/lunar-lander/ppo.zip')
    phi = SafetyProp()
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         phi = "(always(a < 0.625 and dx < 0.1) or d > 0.3)" 
         specification = RTAMTDense(phi, {"a": 0, "dx": 1, "d":2})
         optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
-        options = Options(runs=100, iterations=100, interval=(0, 1), static_parameters=[(0.0,20.0),(0.0,2.0),(-3.0,3.0),(-3.0,3.0)])
+        options = Options(runs=100, iterations=100, interval=(0, 1), static_parameters=[(0.0,10.0),(0.0,1.0),(-3.0,3.0),(-3.0,3.0)])
         result = staliro(lunarmodel, specification, optimizer, options)
         import csv 
         with open(filename, 'w', newline='') as file:
@@ -99,8 +99,8 @@ if __name__ == "__main__":
     else:
         print('Data found, plotting.... \n')
         # lot of extra code for plotting tbh
-        winds = [0.0, 20.0]
-        turbulences = [0.0, 2.0]
+        winds = [0.0, 10.0]  
+        turbulences = [0.0, 1.0]
         env = DevLunarLander(winds, turbulences, (0.0, 0.0))
         agent = PPO('/usr0/home/parvk/cj_project/STL-Robustness/models/lunar-lander/ppo.zip')
         phi = SafetyProp()

@@ -39,7 +39,7 @@ agent = PPOVanilla(load_dir)
 
 @blackbox()
 def car_run_model(static: Sequence[float], times: SignalTimes, signals: SignalValues) -> CarRunDataT:
-   speed = [5.0, 60.0]
+   speed = [5.0, 35.0]
    steering = [0.2, 0.8]
    env = DevCarRun(load_dir, speed, steering)
    episode_len = 200
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         phi = "(always(x < 0.500125 and y < 0.575) or d > 0.3)" 
         specification = RTAMTDense(phi, {"x": 0, "y": 1, "d": 2})
         optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
-        options = Options(runs=10, iterations=10, interval=(0, 1), static_parameters=[(5.0,60.0),(0.2,0.8),(-0.1,0.1),(-0.1,0.1),(2.35619449, 3.92699082)])
+        options = Options(runs=100, iterations=100, interval=(0, 1), static_parameters=[(5.0,35.0),(0.2,0.8),(-0.1,0.1),(-0.1,0.1),(2.35619449, 3.92699082)])
         result = staliro(car_run_model, specification, optimizer, options)
         import csv 
         with open(filename, 'w', newline='') as file:
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         print('Data found, plotting.... \n')
         # lot of extra code for plotting tbh
         load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_run_ppo_vanilla/model_save/model.pt'
-        speed = [5.0, 60.0]
+        speed = [5.0, 35.0]
         steering = [0.2, 0.8]
         env = DevCarRun(load_dir, speed, steering)
         agent = PPOVanilla(load_dir)

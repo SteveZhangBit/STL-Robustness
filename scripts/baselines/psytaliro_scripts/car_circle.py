@@ -39,10 +39,9 @@ agent = PPOVanilla(load_dir)
 
 @blackbox()
 def car_circle_model(static: Sequence[float], times: SignalTimes, signals: SignalValues) -> CarRunDataT:
-   speed = [5.0, 60.0]
+   speed = [5.0, 35.0]
    steering = [0.2, 0.8]
    env = DevCarCircle(load_dir, speed, steering)
-   phi = SafetyProp()
    episode_len = 300
 
    # this is for dist only
@@ -86,7 +85,7 @@ if __name__ == "__main__":
         phi = "(always(x < 0.50035) or d > 0.3)" 
         specification = RTAMTDense(phi, {"x": 0, "d": 1})
         optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
-        options = Options(runs=100, iterations=100, interval=(0, 1), static_parameters=[(5.0,60.0),(0.2,0.8),(-3.0,3.0),(-3.0,3.0)])
+        options = Options(runs=100, iterations=100, interval=(0, 1), static_parameters=[(5.0,35.0),(0.2,0.8),(-3.0,3.0),(-3.0,3.0)])
         result = staliro(car_circle_model, specification, optimizer, options)
         import csv 
         with open(filename, 'w', newline='') as file:
@@ -98,7 +97,7 @@ if __name__ == "__main__":
     else:
         print('Data found, plotting.... \n')
         load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_circle_ppo_vanilla/model_save/model.pt'
-        speed = [5.0, 60.0]
+        speed = [5.0, 35.0]
         steering = [0.2, 0.8]
         env = DevCarCircle(load_dir, speed, steering)
         agent = PPOVanilla(load_dir)
