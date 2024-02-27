@@ -4,6 +4,7 @@ from rsrl.evaluator import Evaluator
 from rsrl.util.run_util import setup_eval_configs
 
 from robustness.analysis.stl import STLEvaluator, STLEvaluator2
+from robustness.analysis.utils import normalize
 from robustness.envs import DeviatableEnv
 
 
@@ -63,15 +64,33 @@ class DevCarRun(DeviatableEnv):
 
 
 class SafetyProp(STLEvaluator):
+    def __init__(self, env, pickle_safe=False):
+        super().__init__(pickle_safe)
+
+        self.y_range = np.asarray([env.observation_space.low[1], env.observation_space.high[1]])
+        self.vel_range = np.asarray([-10.0, 10.0])
+
     def prop(self):
         y = stl.Predicate('y')
         vel = stl.Predicate('vel')
-        return stl.Always( (y < 0.25) & (vel < 1.5) )
+        y_check = normalize(0.25, self.y_range)
+        vel_check = normalize(1.5, self.vel_range)
+        return stl.Always( (y < y_check) & (vel < vel_check) )
     
     def build_signal(self, record, time_index):
         return {
-            'y': stl.Signal(np.abs(record[:, 1]), time_index),
-            'vel': stl.Signal(np.linalg.norm(record[:, 2:4], axis=1), time_index)
+            'y': stl.Signal(
+                normalize(np.abs(record[:, 1]), self.y_range),
+                time_index
+            ),
+            'vel': stl.Signal(
+                normalize(
+                    np.clip(np.linalg.norm(record[:, 2:4], axis=1),
+                            self.vel_range[0], self.vel_range[1]),
+                    self.vel_range
+                ),
+                time_index
+            )
         }
 
 

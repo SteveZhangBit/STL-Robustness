@@ -23,7 +23,7 @@ speed = [5.0, 35.0]
 steering = [0.2, 0.8]
 env = DevCarRun(load_dir, speed, steering)
 agent = PPOVanilla(load_dir)
-phi = SafetyProp()
+phi = SafetyProp(env.instantiate(env.get_delta_0())[0])
 
 prob = Problem(env, agent, phi, L2Norm(env))
 sys_eval = CMASystemEvaluator(
