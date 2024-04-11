@@ -84,7 +84,7 @@ def plot_csv_samples(filename, experiment):
 if __name__ == "__main__":
     filename = "baseline_results/lunar_lander_data.csv"
     if not os.path.isfile(filename):
-        phi = "(always(a < 0.625 and dx < 0.1) or d > 0.3)" 
+        phi = "(always(a < 0.625 and dx < 0.1) or d > 0.1)" 
         specification = RTAMTDense(phi, {"a": 0, "dx": 1, "d":2})
         optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
         options = Options(runs=100, iterations=100, interval=(0, 1), static_parameters=[(0.0,10.0),(0.0,1.0),(-3.0,3.0),(-3.0,3.0)])
