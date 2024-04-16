@@ -1,13 +1,15 @@
-function [obj_best, obj_values, all_signal_values, violation_signal_values, all_param_values, violation_param_values] = breach_falsification(env, phi, trials, evals)
+function [obj_best, obj_values, obj_best_signal_values, all_signal_values, all_param_values] = breach_falsification(env, phi, trials, evals)
 
   obj_best = inf;
+  obj_best_signal_values = struct();
+
   obj_values = zeros(trials, evals);
 
   all_signal_values = struct();
-  violation_signal_values = struct();
+  % violation_signal_values = struct();
 
   all_param_values = struct();
-  violation_param_values = struct();
+  % violation_param_values = struct();
 
   for n = 1:trials
     phi = STL_Formula('phi', phi);
@@ -17,14 +19,20 @@ function [obj_best, obj_values, all_signal_values, violation_signal_values, all_
     falsif_pb.setup_solver('cmaes');
     falsif_pb.solve();
 
-    obj_best = min(obj_best, falsif_pb.obj_best);
-    obj_values(n, :) = falsif_pb.obj_log;
-
     traces = falsif_pb.GetLog;
     % summary = traces.GetSummary;
     % violation_indices = find(summary.num_violations_per_trace > 0);
 
     signal_names = traces.GetSignalList;
+
+    if falsif_pb.obj_best < obj_best
+      obj_best = falsif_pb.obj_best;
+      for i = 1:length(signal_names)
+        obj_best_signal_values.(signal_names{i}) = falsif_pb.GetBest.GetSignalValues(signal_names{i});
+      end
+    end
+    obj_values(n, :) = falsif_pb.obj_log;
+    
     for i = 1:length(signal_names)
       if isfield(all_signal_values, signal_names{i})
         all_signal_values.(signal_names{i}) = [all_signal_values.(signal_names{i}); traces.GetSignalValues(signal_names{i})];
