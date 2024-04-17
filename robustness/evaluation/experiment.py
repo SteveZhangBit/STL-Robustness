@@ -1,6 +1,7 @@
 import os
 import pickle
 from datetime import datetime
+from itertools import chain
 from matplotlib import pyplot as plt
 
 import numpy as np
@@ -72,6 +73,13 @@ class Experiment:
         options = self.evaluator.solver.options()
         samples_in_options = options['evals'] * (1 + options['restarts'])
         records = [[record[0][:samples_in_options], record[1][:samples_in_options], record[2]] for record in records]
+        records_zip = list(zip(*records))
+        total_record = [
+            list(chain.from_iterable(records_zip[0])),
+            list(chain.from_iterable(records_zip[1])),
+            sum(records_zip[2])
+        ]
+        records.append(total_record)
 
         total_times = [record[2] for record in records]
         records = [
@@ -97,7 +105,7 @@ class Experiment:
         print(summary)
         summary.to_csv(f'{out_dir}/summary.csv', index=False)
 
-        return records, violations
+        return records[:-1], violations
 
     def plot_samples(self, samples, x_name, y_name, out_dir, n, **kwargs):
         dev_bounds = self.evaluator.problem.env.get_dev_bounds()

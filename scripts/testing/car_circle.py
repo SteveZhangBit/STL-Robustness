@@ -59,12 +59,12 @@ plt.savefig(f'gifs/car-circle-ppo/fig-violations-cma-all.png', bbox_inches='tigh
 #     plt.savefig('gifs/car-circle-ppo/fig-unsafe-region-cma.png', bbox_inches='tight')
 
 # Generate a gif
-import pickle
+# import pickle
 
-with open('data/car-circle-ppo/cma/records-min-violations-0.pickle', 'rb') as f:
-    data = pickle.load(f)
-delta = data[0][np.argmin(data[1])]
-evaluator.visualize_violation(delta, gif="gifs/car-circle-ppo/counterexample.gif", render=True)
+# with open('data/car-circle-ppo/cma/records-min-violations-0.pickle', 'rb') as f:
+#     data = pickle.load(f)
+# delta = data[0][np.argmin(data[1])]
+# evaluator.visualize_violation(delta, gif="gifs/car-circle-ppo/counterexample.gif", render=True)
 
 
 # Use random search
