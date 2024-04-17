@@ -23,3 +23,34 @@ class L2Norm(DistanceEvaluator):
         delta = normalize(delta, self.env.get_dev_bounds())
         delta_0 = normalize(self.env.get_delta_0(), self.env.get_dev_bounds())
         return np.sqrt( np.sum((delta - delta_0) ** 2) )
+
+
+def compute_cosine_similarity(trace1, trace2):
+    '''
+    Computes the cosine similarity between two traces of shape n*t.
+    
+    Parameters:
+        trace1 (np.ndarray): First trace matrix of shape (n, t).
+        trace2 (np.ndarray): Second trace matrix of shape (n, t).
+        
+    Returns:
+        float: Cosine similarity between the two traces.
+    '''
+    smaller_len = min(len(trace1), len(trace2))
+    trace1 = trace1[:smaller_len]
+    trace2 = trace2[:smaller_len]
+
+    # Flatten the traces
+    trace1_flat = trace1.flatten()
+    trace2_flat = trace2.flatten()
+    
+    # Compute the dot product
+    dot_product = np.dot(trace1_flat, trace2_flat)
+    
+    # Compute the norms
+    norm_trace1 = np.linalg.norm(trace1_flat)
+    norm_trace2 = np.linalg.norm(trace2_flat)
+    
+    # Compute cosine similarity
+    cosine_similarity = dot_product / (norm_trace1 * norm_trace2)
+    return cosine_similarity

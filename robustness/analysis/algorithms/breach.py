@@ -2,6 +2,7 @@ import os
 import numpy as np
 
 from robustness.analysis import *
+from robustness.analysis.utils import compute_cosine_similarity
 
 
 class BreachSystemEvaluator(SystemEvaluator):
@@ -53,6 +54,22 @@ class BreachSystemEvaluator(SystemEvaluator):
 
     def get_params(self, name):
         return self.all_param_values[name]
+
+
+class BreachSystemEvaluatorWithHeuristic(BreachSystemEvaluator):
+    def __init__(self, eng, phi: TraceEvaluator, signal_names, delta_0_signals, opts=None):
+        super().__init__(eng, phi, opts)
+        self.signal_names = signal_names
+        self.delta_0_signals = np.array([delta_0_signals[s] for s in signal_names]).T
+        self.obj_best = None
+    
+    def eval_sys(self, delta, problem: Problem):
+        obj_best, _ = super().eval_sys(delta, problem)
+        self.obj_best = obj_best
+        delta_signals = np.array([self.obj_best_signal_values[s] for s in self.signal_names])
+        delta_signals = delta_signals.T
+        cos_similarity = compute_cosine_similarity(self.delta_0_signals, delta_signals)
+        return obj_best + cos_similarity, None
 
 
 class BreachOneLayerSystemEvaluator(BreachSystemEvaluator):

@@ -31,14 +31,14 @@ function [obj_best, obj_values, obj_best_signal_values, all_signal_values, all_p
         obj_best_signal_values.(signal_names{i}) = falsif_pb.GetBest.GetSignalValues(signal_names{i});
       end
     end
-    obj_values(n, :) = falsif_pb.obj_log;
+    % obj_values(n, :) = falsif_pb.obj_log;
     
     for i = 1:length(signal_names)
-      if isfield(all_signal_values, signal_names{i})
-        all_signal_values.(signal_names{i}) = [all_signal_values.(signal_names{i}); traces.GetSignalValues(signal_names{i})];
-      else
-        all_signal_values.(signal_names{i}) = traces.GetSignalValues(signal_names{i});
-      end
+      % if isfield(all_signal_values, signal_names{i})
+      %   all_signal_values.(signal_names{i}) = [all_signal_values.(signal_names{i}); traces.GetSignalValues(signal_names{i})];
+      % else
+      %   all_signal_values.(signal_names{i}) = traces.GetSignalValues(signal_names{i});
+      % end
 
       % if isempty(violation_indices) == false
       %   if isfield(violation_signal_values, signal_names{i})
@@ -51,11 +51,11 @@ function [obj_best, obj_values, obj_best_signal_values, all_signal_values, all_p
 
     param_names = traces.GetParamList;
     for i = 1:length(param_names)
-      if isfield(all_param_values, param_names{i})
-        all_param_values.(param_names{i}) = [all_param_values.(param_names{i}); traces.GetParam(param_names{i})];
-      else
-        all_param_values.(param_names{i}) = traces.GetParam(param_names{i});
-      end
+      % if isfield(all_param_values, param_names{i})
+      %   all_param_values.(param_names{i}) = [all_param_values.(param_names{i}); traces.GetParam(param_names{i})];
+      % else
+      %   all_param_values.(param_names{i}) = traces.GetParam(param_names{i});
+      % end
       
       % if isempty(violation_indices) == false
       %   if isfield(violation_param_values, param_names{i})

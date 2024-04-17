@@ -120,7 +120,10 @@ class CMASolver(Solver):
 
         def eval_sys(delta):
             v, x0 = self.sys_evaluator.eval_sys(delta, problem)
-            logger[tuple(delta)] = (v, x0)
+            if hasattr(self.sys_evaluator, 'obj_best'):
+                logger[tuple(delta)] = (self.sys_evaluator.obj_best, x0)
+            else:
+                logger[tuple(delta)] = (v, x0)
             return v
 
         if boundary is not None:
