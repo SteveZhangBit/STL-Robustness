@@ -40,7 +40,7 @@ sys_eval_0.eval_sys(env.get_delta_0(), prob)
 delta_0_signals = sys_eval_0.obj_best_signal_values
 sys_eval = BreachSystemEvaluatorWithHeuristic(
     eng, phi,
-    ['h_error'],
+    ['h_error', 'h_out'],
     delta_0_signals,
     {'restarts': 1, 'evals': 50}
 )
