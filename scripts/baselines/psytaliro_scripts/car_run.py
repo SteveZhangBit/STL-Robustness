@@ -40,7 +40,7 @@ agent = PPOVanilla(load_dir)
 
 @blackbox()
 def car_run_model(static: Sequence[float], times: SignalTimes, signals: SignalValues) -> CarRunDataT:
-   speed = [5.0, 60.0]
+   speed = [5.0, 35.0]
    steering = [0.2, 0.8]
    env = DevCarRun(load_dir, speed, steering)
    episode_len = 200

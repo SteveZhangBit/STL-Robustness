@@ -43,7 +43,6 @@ def car_circle_model(static: Sequence[float], times: SignalTimes, signals: Signa
    speed = [5.0, 35.0]
    steering = [0.2, 0.8]
    env = DevCarCircle(load_dir, speed, steering)
-   phi = SafetyProp()
    episode_len = 300
 
    # this is for dist only
@@ -147,6 +146,16 @@ if __name__ == "__main__":
                 writer.writerow([evaluation.sample[0],evaluation.sample[1], evaluation.sample[2],evaluation.sample[3], evaluation.cost])
     else:
         print('Data found, plotting.... \n')
+<<<<<<< HEAD
         create_new_rob_csv(filename)
+=======
+        load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_circle_ppo_vanilla/model_save/model.pt'
+        speed = [5.0, 35.0]
+        steering = [0.2, 0.8]
+        env = DevCarCircle(load_dir, speed, steering)
+        agent = PPOVanilla(load_dir)
+        phi = SafetyProp()
+        episode_len = 300
+>>>>>>> c71058c6ef612cfae4d68418b9128c9fe4de873e
 
     
