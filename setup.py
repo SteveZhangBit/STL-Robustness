@@ -20,7 +20,7 @@ setuptools.setup(
         'imageio',
         'pygmo',
         'statsmodels',
-        'matlabengine',
+        # 'matlabengine',
     ],
     packages=setuptools.find_packages(),
     classifiers=[

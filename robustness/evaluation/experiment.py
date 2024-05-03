@@ -114,7 +114,8 @@ class Experiment:
         
         for s in samples:
             points = np.array([normalize(X, dev_bounds) for (X, Y) in s if Y >= 0.0])
-            plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='gray',
+            if len(points) > 0:
+                plt.scatter(points[:, 0] * (n-1), points[:, 1] * (n-1), c='gray',
                         marker='x', alpha=0.90, s=40)
 
             points = np.array([normalize(X, dev_bounds) for (X, Y) in s if Y < 0.0])

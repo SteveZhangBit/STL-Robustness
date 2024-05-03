@@ -12,13 +12,13 @@ from robustness.envs.car_circle import DevCarCircle, SafetyProp, SafetyProp2
 from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
 
-os.makedirs('gifs/car-circle-ppo', exist_ok=True)
+os.makedirs('gifs/car-circle-ppo-heuristic3', exist_ok=True)
 plt.rc('axes', labelsize=17, titlesize=17)
 plt.rc('xtick', labelsize=14)
 plt.rc('ytick', labelsize=14)
 plt.rc('legend', fontsize=14)
 
-load_dir = 'models/car_circle_ppo_vanilla/model_save/model.pt'
+load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_circle_ppo_vanilla/model_save/model.pt'
 speed = [5.0, 35.0]
 steering = [0.2, 0.8]
 env = DevCarCircle(load_dir, speed, steering)
@@ -30,52 +30,52 @@ sys_eval = CMASystemEvaluator(
     0.4, phi,
     {'restarts': 1, 'episode_len': 300, 'evals': 50}
 )
-
-# Use CMA
-solver = CMASolver(0.1, sys_eval, {'restarts': 1, 'evals': 50})
+# v, x0 = sys_eval.eval_sys(env.delta_0, prob, save_best=True)
+# # Use CMA
+solver = CMASolver(0.2, sys_eval, {'restarts': 1, 'evals': 50})
 evaluator = Evaluator(prob, solver)
 experiment = Experiment(evaluator)
 
 print('Find violations by CMA...')
-records_cma = experiment.record_min_violations(out_dir='data/car-circle-ppo/cma')
-records_cma, violations_cma = experiment.summarize_violations(records_cma, 'data/car-circle-ppo/cma')
+records_cma = experiment.record_min_violations(out_dir='data/car-circle-ppo-heuristic3/cma')
+records_cma, violations_cma = experiment.summarize_violations(records_cma, 'data/car-circle-ppo-heuristic3/cma')
 # Plot all samples
 for i in range(len(records_cma)):
     samples = [(X, Y) for (X, Y, _) in records_cma[i]]
-    experiment.plot_samples(samples, 'Speed', 'Steering', 'data/car-circle-ppo', n=20)
+    experiment.plot_samples(samples, 'Speed', 'Steering', 'data/car-circle-ppo-heuristic3', n=20)
     plt.title('Violations found by CMA')
-    plt.savefig(f'gifs/car-circle-ppo/fig-violations-cma-{i}.png', bbox_inches='tight')
+    plt.savefig(f'gifs/car-circle-ppo-heuristic3/fig-violations-cma-{i}.png', bbox_inches='tight')
 
-experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_cma], 'Speed', 'Steering', 'data/car-circle-ppo', n=20)
-# plt.title('Car-Circle-PPO with CMA')
-plt.savefig(f'gifs/car-circle-ppo/fig-violations-cma-all.png', bbox_inches='tight')
+# experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_cma], 'Speed', 'Steering', 'data/car-circle-ppo-heuristic2', n=20)
+# # plt.title('Car-Circle-PPO with CMA')
+# plt.savefig(f'gifs/car-circle-ppo-heuristic2/fig-violations-cma-all.png', bbox_inches='tight')
 
-# Find the minimum violation and certify an unsafe region
-# min_violation = experiment.min_violation_of_all(violations_cma)
-# if min_violation is not None:
-#     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/car-circle-ppo', n=1000)
-#     experiment.plot_unsafe_region(min_violation, radius, 'Speed', 'Steering', 'data/car-circle-ppo', n=20)
-#     plt.title('Unsafe region found by CMA')
-#     plt.savefig('gifs/car-circle-ppo/fig-unsafe-region-cma.png', bbox_inches='tight')
+# # Find the minimum violation and certify an unsafe region
+# # min_violation = experiment.min_violation_of_all(violations_cma)
+# # if min_violation is not None:
+# #     radius = evaluator.unsafe_region(min_violation, 0.1, 0.05, 'data/car-circle-ppo', n=1000)
+# #     experiment.plot_unsafe_region(min_violation, radius, 'Speed', 'Steering', 'data/car-circle-ppo', n=20)
+# #     plt.title('Unsafe region found by CMA')
+# #     plt.savefig('gifs/car-circle-ppo/fig-unsafe-region-cma.png', bbox_inches='tight')
 
-# Use random search
-solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
-evaluator = Evaluator(prob, solver)
-experiment = Experiment(evaluator)
+# # Use random search
+# solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
+# evaluator = Evaluator(prob, solver)
+# experiment = Experiment(evaluator)
 
-print('Find violations by random search...')
-records_random = experiment.record_min_violations(out_dir='data/car-circle-ppo/random')
-records_random, violations_random = experiment.summarize_violations(records_random, 'data/car-circle-ppo/random')
-# Plot all samples
-for i in range(len(records_random)):
-    samples = [(X, Y) for (X, Y, _) in records_random[i]]
-    experiment.plot_samples(samples, 'Speed', 'Steering', 'data/car-circle-ppo', n=20)
-    plt.title('Violations found by random search')
-    plt.savefig(f'gifs/car-circle-ppo/fig-violations-random-{i}.png', bbox_inches='tight')
+# print('Find violations by random search...')
+# records_random = experiment.record_min_violations(out_dir='data/car-circle-ppo/random')
+# records_random, violations_random = experiment.summarize_violations(records_random, 'data/car-circle-ppo/random')
+# # Plot all samples
+# for i in range(len(records_random)):
+#     samples = [(X, Y) for (X, Y, _) in records_random[i]]
+#     experiment.plot_samples(samples, 'Speed', 'Steering', 'data/car-circle-ppo', n=20)
+#     plt.title('Violations found by random search')
+#     plt.savefig(f'gifs/car-circle-ppo/fig-violations-random-{i}.png', bbox_inches='tight')
 
-experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Speed', 'Steering', 'data/car-circle-ppo', n=20)
-# plt.title('Car-Circle-PPO with Random')
-plt.savefig(f'gifs/car-circle-ppo/fig-violations-random-all.png', bbox_inches='tight')
+# experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Speed', 'Steering', 'data/car-circle-ppo', n=20)
+# # plt.title('Car-Circle-PPO with Random')
+# plt.savefig(f'gifs/car-circle-ppo/fig-violations-random-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
 # min_violation = experiment.min_violation_of_all(violations_random)

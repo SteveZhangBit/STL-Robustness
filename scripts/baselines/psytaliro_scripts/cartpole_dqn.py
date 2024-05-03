@@ -31,6 +31,7 @@ from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
 from matplotlib import pyplot as plt
 import pandas as pd
+import csv
 CartpoleDataT = ModelResult[List[float], None]
 
 
@@ -76,6 +77,56 @@ def plot_csv_samples(filename, experiment):
     experiment.plot_samples(samples, 'Mass', 'Force', '/usr0/home/parvk/cj_project/STL-Robustness/data/cartpole-dqn', n=20)
     plt.savefig(f'baseline_results/cartpole_dqn_d2.png', bbox_inches='tight')
 
+def create_new_rob_csv(filename):
+        masses = [0.1, 2.0]
+        forces = [1.0, 20.0]
+        env = DevCartPole(masses, forces, (1.0, 10.0))
+        agent = DQN('/usr0/home/parvk/cj_project/STL-Robustness/models/cartpole/best_dqn')
+        phi = SafetyProp()
+        episode_len = 200
+
+        # Create problem and solver
+        prob = Problem(env, agent, phi, L2Norm(env))
+        sys_eval = CMASystemEvaluator(0.4, phi, {'timeout': 1, 'episode_len': 200})
+        # Use CMA
+        solver = CMASolver(0.2, sys_eval)
+        evaluator = Evaluator(prob, solver)
+        experiment = Experiment(evaluator)
+        
+        #best_sample = plot_csv_samples(filename, experiment)
+        #print(best_sample)
+        final_deltas = []
+        data = pd.read_csv(filename)
+        #data = np.genfromtxt(file_with_min_robustness, delimiter=',', dtype=float, skip_header=1, invalid_raise=False, usemask=True, filling_values=np.nan)
+        # samples = [([row['d1'], row['d2']], row['Cost']) for index, row in data.iterrows()]
+        for index,row in data.iterrows():
+            # set the deviation params first (steering and speed)
+            e, x0bounds = env.instantiate([row['d1'], row['d2']])
+            space = e.observation_space
+            # set the initial state after
+            obs = e.reset_to([row['i1'], row['i2'],row['i3'], row['i4']]) 
+            obs_record = [obs]
+            reward_record = [0]
+            for _ in range(episode_len):
+                action = agent.next_action(obs)
+                obs, reward, _, _ = e.step(action)
+                obs_record.append(np.clip(obs, space.low, space.high))
+                reward_record.append(reward)
+            score =sys_eval.phi.eval_trace(np.array(obs_record), np.array(reward_record))
+            if score < 0:
+                final_deltas.append([row['d1'],row['d2'], score])
+            
+        with open('baseline_results/delta_cartpole.csv', mode='w', newline='') as file:
+            writer = csv.writer(file)
+
+            # # Write the header
+            # writer.writerow(['Robustness', ' Delta', ' States', ' Actions'])
+
+            # Write the data rows
+            for row in final_deltas:
+                writer.writerow(row)
+        # print(final_deltas)
+
 if __name__ == "__main__":
     filename = "baseline_results/cartpole_data.csv"
     if not os.path.isfile(filename):
@@ -95,21 +146,22 @@ if __name__ == "__main__":
                 writer.writerow([evaluation.sample[0],evaluation.sample[1], evaluation.sample[2],evaluation.sample[3],evaluation.sample[4],evaluation.sample[5], evaluation.cost])
     else:
         print('Data found, plotting.... \n')
+        create_new_rob_csv(filename)
         # lot of extra code for plotting tbh
-        masses = [0.1, 2.0]
-        forces = [1.0, 20.0]
-        env = DevCartPole(masses, forces, (1.0, 10.0))
-        agent = DQN('/usr0/home/parvk/cj_project/STL-Robustness/models/cartpole/best_dqn')
-        phi = SafetyProp()
+        # masses = [0.1, 2.0]
+        # forces = [1.0, 20.0]
+        # env = DevCartPole(masses, forces, (1.0, 10.0))
+        # agent = DQN('/usr0/home/parvk/cj_project/STL-Robustness/models/cartpole/best_dqn')
+        # phi = SafetyProp()
 
-        # Create problem and solver
-        prob = Problem(env, agent, phi, L2Norm(env))
-        sys_eval = CMASystemEvaluator(0.4, phi, {'timeout': 1, 'episode_len': 200})
-        # Use CMA
-        solver = CMASolver(0.2, sys_eval)
-        evaluator = Evaluator(prob, solver)
-        experiment = Experiment(evaluator)
-        plot_csv_samples(filename, experiment)
+        # # Create problem and solver
+        # prob = Problem(env, agent, phi, L2Norm(env))
+        # sys_eval = CMASystemEvaluator(0.4, phi, {'timeout': 1, 'episode_len': 200})
+        # # Use CMA
+        # solver = CMASolver(0.2, sys_eval)
+        # evaluator = Evaluator(prob, solver)
+        # experiment = Experiment(evaluator)
+        # plot_csv_samples(filename, experiment)
     
     # the following code is to visualize the deviation
     # best_sample = worst_eval(best_run(result)).sample

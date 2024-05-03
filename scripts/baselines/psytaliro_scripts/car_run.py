@@ -32,6 +32,7 @@ from robustness.evaluation import Evaluator, Experiment
 from robustness.evaluation.utils import boxplot
 import pandas as pd
 from matplotlib import pyplot as plt
+import csv
 CarRunDataT = ModelResult[List[float], None]
 
 load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_run_ppo_vanilla/model_save/model.pt'
@@ -83,29 +84,10 @@ def plot_csv_samples(filename, experiment):
     min_cost_row = data.loc[data['Cost'].idxmin()]
     return min_cost_row
 
-
-
-
-if __name__ == "__main__":
-    filename = "baseline_results/car_run_data.csv"
-    if not os.path.isfile(filename):
-        phi = "(always(x < 0.500125 and y < 0.575) or d > 0.3)" 
-        specification = RTAMTDense(phi, {"x": 0, "y": 1, "d": 2})
-        optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
-        options = Options(runs=10, iterations=10, interval=(0, 1), static_parameters=[(5.0,60.0),(0.2,0.8),(-0.1,0.1),(-0.1,0.1),(2.35619449, 3.92699082)])
-        result = staliro(car_run_model, specification, optimizer, options)
-        import csv 
-        with open(filename, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(['d1','d2', 'i1', 'i2', 'i3', 'Cost'])
-            for run in result.runs:
-                evaluation = worst_eval(run)
-                writer.writerow([evaluation.sample[0],evaluation.sample[1], evaluation.sample[2],evaluation.sample[3], evaluation.sample[4], evaluation.cost])
-    else:
-        print('Data found, plotting.... \n')
+def create_new_rob_csv(filename):
         # lot of extra code for plotting tbh
         load_dir = '/usr0/home/parvk/cj_project/STL-Robustness/models/car_run_ppo_vanilla/model_save/model.pt'
-        speed = [5.0, 60.0]
+        speed = [5.0, 35.0]
         steering = [0.2, 0.8]
         env = DevCarRun(load_dir, speed, steering)
         agent = PPOVanilla(load_dir)
@@ -120,14 +102,59 @@ if __name__ == "__main__":
         evaluator = Evaluator(prob, solver)
         experiment = Experiment(evaluator)
         best_sample = plot_csv_samples(filename, experiment)
-        print(best_sample)
-        # set the deviation params first (steering and speed)
-        env, x0bounds = env.instantiate(best_sample[0:2], render=True)
-        # set the initial state after
-        obs = env.reset_to(best_sample[2:5]) 
-        for _ in range(episode_len):
-            action = agent.next_action(obs)
-            obs, reward, _, _ = env.step(action)
-            time.sleep(0.2) 
-            env.render()
+        #print(best_sample)
+        # final_deltas = []
+        # data = pd.read_csv(filename)
+        # #data = np.genfromtxt(file_with_min_robustness, delimiter=',', dtype=float, skip_header=1, invalid_raise=False, usemask=True, filling_values=np.nan)
+        # # samples = [([row['d1'], row['d2']], row['Cost']) for index, row in data.iterrows()]
+        # for index,row in data.iterrows():
+        #     # set the deviation params first (steering and speed)
+        #     e, x0bounds = env.instantiate([row['d1'], row['d2']])
+        #     space = e.observation_space
+        #     # set the initial state after
+        #     obs = e.reset_to([row['i1'], row['i2'],row['i3']]) 
+        #     obs_record = [obs]
+        #     reward_record = [0]
+        #     for _ in range(episode_len):
+        #         action = agent.next_action(obs)
+        #         obs, reward, _, _ = e.step(action)
+        #         obs_record.append(np.clip(obs, space.low, space.high))
+        #         reward_record.append(reward)
+        #     score =sys_eval.phi.eval_trace(np.array(obs_record), np.array(reward_record))
+        #     if score < 0:
+        #         final_deltas.append([row['d1'],row['d2'], score])
+            
+        # with open('baseline_results/delta_car_run.csv', mode='w', newline='') as file:
+        #     writer = csv.writer(file)
+
+        #     # # Write the header
+        #     # writer.writerow(['Robustness', ' Delta', ' States', ' Actions'])
+
+        #     # Write the data rows
+        #     for row in final_deltas:
+        #         writer.writerow(row)
+        # print(final_deltas)
+
+
+
+
+if __name__ == "__main__":
+    filename = "baseline_results/car_run_data.csv"
+    if not os.path.isfile(filename):
+        phi = "(always(x < 0.500125 and y < 0.575) or d > 0.3)" 
+        specification = RTAMTDense(phi, {"x": 0, "y": 1, "d": 2})
+        optimizer = DualAnnealing(behavior = Behavior.MINIMIZATION)
+        options = Options(runs=300, iterations=300, interval=(0, 1), static_parameters=[(5.0,35.0),(0.2,0.8),(-0.1,0.1),(-0.1,0.1),(2.35619449, 3.92699082)])
+        result = staliro(car_run_model, specification, optimizer, options)
+        import csv 
+        with open(filename, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['d1','d2', 'i1', 'i2', 'i3', 'Cost'])
+            for run in result.runs:
+                evaluation = worst_eval(run)
+                writer.writerow([evaluation.sample[0],evaluation.sample[1], evaluation.sample[2],evaluation.sample[3], evaluation.sample[4], evaluation.cost])
+    else:
+        print('Data found, plotting.... \n')
+        create_new_rob_csv(filename)
+
             

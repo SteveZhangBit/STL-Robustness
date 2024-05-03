@@ -2,7 +2,7 @@ import cma
 import numpy as np
 
 from robustness.analysis import *
-from robustness.analysis.utils import normalize, scale
+from robustness.analysis.utils import normalize, scale, compute_cosine_similarity
 
 
 class CMASystemEvaluator(SystemEvaluator):
@@ -10,7 +10,7 @@ class CMASystemEvaluator(SystemEvaluator):
         super().__init__(phi, opts)
         self.sigma = sigma
     
-    def eval_sys(self, delta, problem: Problem):
+    def eval_sys(self, delta, problem: Problem, save_best=False):
         timeout = self._options['timeout']
         restarts = self._options['restarts']
         max_evals = self._options['evals']
@@ -22,7 +22,7 @@ class CMASystemEvaluator(SystemEvaluator):
         # on second thoughts, not needed.
         for _ in range(1 + restarts):
             x, es = cma.fmin2(
-                lambda x: self._eval_trace(scale(x, x0_bounds), env, problem.agent, delta),
+                lambda x: self._eval_trace(scale(x, x0_bounds), env, problem.agent, delta, save_best),
                 lambda: np.random.rand(len(x0_bounds)),
                 self.sigma,
                 {'bounds': [0.0, 1.0], 'maxfevals': max_evals, 'timeout': timeout * 60, 'verbose': -9},
@@ -68,6 +68,15 @@ class CMASolver(Solver):
 
         def eval_sys(delta):
             v, x0 = self.sys_evaluator.eval_sys(delta, problem)
+            # env, x0_bounds = problem.env.instantiate(delta)
+            # score, trace = self.sys_evaluator._eval_trace(scale(x0, x0_bounds), env, problem.agent, delta, save_best=True)
+            # #how to compute the cosine similarity with a nominal trajectory 
+            # # i think the the command before can be configured to return a trajectory instead of just v and x0, after that we can basically just compute the difference from a locally saved worst traj?
+            # # okay instead of evaluating, i am just going to simulate it once and get the trajectory out
+            # #sim_score = compute_cosine_similarity(trace)
+            # print('\n\n\n')
+            # print('new trace')
+            # print(trace)
             logger[tuple(delta)] = x0
             return v
 
@@ -137,6 +146,26 @@ class CMASolver(Solver):
 
         def eval_sys(delta):
             v, x0 = self.sys_evaluator.eval_sys(delta, problem)
+            env, x0_bounds = problem.env.instantiate(delta)
+            score, trace = self.sys_evaluator._eval_trace(scale(x0, x0_bounds), env, problem.agent, delta, save_best=True)
+            #how to compute the cosine similarity with a nominal trajectory 
+            # i think the the command before can be configured to return a trajectory instead of just v and x0, after that we can basically just compute the difference from a locally saved worst traj?
+            # okay instead of evaluating, i am just going to simulate it once and get the trajectory out
+            
+            # TODO: first load the worst case nominal trace
+            # currently i am hardcoding for lunar lander
+            #nom_trace = np.genfromtxt('/usr0/home/parvk/cj_project/STL-Robustness/delta_nom_trace.csv', delimiter=',', dtype=float, skip_header=0, invalid_raise=False, usemask=True, filling_values=np.nan)
+            #nom_trace = np.genfromtxt('/usr0/home/parvk/cj_project/STL-Robustness/delta_nom_trace_cartpole.csv', delimiter=',', dtype=float, skip_header=0, invalid_raise=False, usemask=True, filling_values=np.nan)
+            #nom_trace = np.genfromtxt('/usr0/home/parvk/cj_project/STL-Robustness/delta_nom_trace_carrun.csv', delimiter=',', dtype=float, skip_header=0, invalid_raise=False, usemask=True, filling_values=np.nan)
+            nom_trace = np.genfromtxt('/usr0/home/parvk/cj_project/STL-Robustness/delta_nom_trace_carcircle.csv', delimiter=',', dtype=float, skip_header=0, invalid_raise=False, usemask=True, filling_values=np.nan)
+            # computing similarity score here 
+            #print(nom_trace)
+            sim_score = compute_cosine_similarity(nom_trace, trace)
+            # print('\n\n\n')
+            # print('new trace')
+            # print(trace)
+
+            #get nominal trace: 
             logger[tuple(delta)] = (v, x0)
             return v
 

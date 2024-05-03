@@ -15,7 +15,6 @@ class PPO(Agent):
     def reset(self):
         pass
 
-
 class LQR(Agent):
     def __init__(self, FPS, VIEWPORT_H, VIEWPORT_W, SCALE):
         super().__init__()

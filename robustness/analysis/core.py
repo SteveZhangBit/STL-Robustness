@@ -58,36 +58,54 @@ class SystemEvaluator:
         '''Return a tuple of <result, x0?>'''
         raise NotImplementedError()
     
-    def save_data(self, delta, obs, action, robustness, type_traj):
-        os.makedirs('../../traces/', exist_ok=True)
-        if type_traj=='violated':
-            file_path = '../../traces/trace_data_new.csv'
+    def save_data(self, delta, obs, action, robustness,env_name, episode_len,eval_id,save_best, type_traj):
+        '''this function saves all the traces found during a run of a system evaluation'''
+        os.makedirs(f'../../traces/{env_name}', exist_ok=True)
+        if save_best is False:
+            if type_traj=='violated':
+                os.makedirs(f'../../traces/{env_name}/violated', exist_ok=True)
+                file_path = f'../../traces/{env_name}/violated/trace_{eval_id}_data.csv' 
+            else:
+                os.makedirs(f'../../traces/{env_name}/satisfied', exist_ok=True)
+                file_path = f'../../traces/{env_name}/satisfied/trace_{eval_id}_data.csv'
         else:
-            file_path = '../../traces/trace_nominal_data.csv'
+            if type_traj=='violated':
+                os.makedirs(f'../../traces/{env_name}/delta0/violated', exist_ok=True)
+                file_path = f'../../traces/{env_name}/delta0/violated/trace_{eval_id}_data.csv' 
+            else:
+                os.makedirs(f'../../traces/{env_name}/delta0/satisfied', exist_ok=True)
+                file_path = f'../../traces/{env_name}/delta0/satisfied/trace_{eval_id}_data.csv'
+        
+        # print(obs.shape)
+        # print(action.shape)
+        if len(action.shape)==1:
+            action = action.reshape((-1,1))
+        # print(action.shape)
         fin = np.concatenate((obs, action), axis=1)
         delta = delta.T
         delta_repeat = np.tile(delta, (len(obs), 1))
         rob = np.array([robustness]).reshape(1,1)
-        rob_repeat = np.tile(rob, (301, 1))
+        rob_repeat = np.tile(rob, (episode_len+1, 1))
         temp_trace = np.concatenate((delta_repeat, fin), axis=1)
         final_trace = np.concatenate((rob_repeat, temp_trace), axis=1)
         # Open the CSV file in write mode
         with open(file_path, mode='a', newline='') as file:
             writer = csv.writer(file)
-
             # Write the header
-            writer.writerow([' Robustness', ' Delta', ' States', ' Actions'])
+            writer.writerow(['Robustness', ' Delta', ' States', ' Actions'])
 
             # Write the data rows
             for row in final_trace:
                 writer.writerow(row)
     
-    def _eval_trace(self, x0, env, agent, delta):
+    def _eval_trace(self, x0, env, agent, delta, save_best):
         # added delta to the function call for logging traces
         space = env.observation_space
         episode_len = self._options['episode_len']
-
+        eval_id = np.random.randint(0,100000)
         obs = env.reset_to(x0)
+        env_id = env.spec.id # for creating traces for different envs
+        env_name = env_id.split('-')[0]
         obs_record = [obs]
         reward_record = [0]
         action_array = []
@@ -98,14 +116,28 @@ class SystemEvaluator:
             obs, reward, _, _ = env.step(action)
             obs_record.append(np.clip(obs, space.low, space.high))
             reward_record.append(reward)
+            # import time
+            # time.sleep(0.05)
         action_array.append(env.action_space.sample())
         score = self.phi.eval_trace(np.array(obs_record), np.array(reward_record))
-        if score < 0:
-            self.save_data(delta, np.array(obs_record),np.array(action_array), score,type_traj='violated')
+        # print(score)
+        # print('\n\n')
+        # commenting this part out because now i am not trying to save the trajs now
+        # print(np.array(action_array).shape)
+        # if score < 0:
+        #     self.save_data(delta, np.array(obs_record),np.array(action_array), score,env_name, episode_len,eval_id, save_best, type_traj='violated')
+        # else:
+        #     self.save_data(delta, np.array(obs_record),np.array(action_array), score,env_name, episode_len,eval_id, save_best, type_traj='safe')
+        # if score < 0:
+        #     self.save_data(delta, np.array(obs_record),np.array(action_array), score,env_name, episode_len,eval_id, save_best, type_traj='violated')
+        # # new code (returns only score)
+        if save_best is False:
+            return score
         else:
-            self.save_data(delta, np.array(obs_record),np.array(action_array), score,type_traj='safe')
-
-        return score
+            return score, np.array(obs_record)
+        
+        # # old code
+        # return score
 
 class Solver:
     def __init__(self, sys_evaluator: SystemEvaluator, opts=None):
