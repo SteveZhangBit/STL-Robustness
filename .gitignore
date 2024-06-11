@@ -8,3 +8,5 @@ outcmaes/
 *.autosave
 *.mexa64
 # **/unsafe_ckp/
+tests/data/
+tests/gifs/

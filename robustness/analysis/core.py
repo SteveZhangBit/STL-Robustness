@@ -46,6 +46,7 @@ class SystemEvaluator:
         }
         if opts is not None:
             self._options.update(opts)
+        self.last_obs_record = None
     
     def set_options(self, opts):
         self._options.update(opts)
@@ -72,6 +73,7 @@ class SystemEvaluator:
             obs_record.append(np.clip(obs, space.low, space.high))
             reward_record.append(reward)
         
+        self.last_obs_record = np.array(obs_record)
         return self.phi.eval_trace(np.array(obs_record), np.array(reward_record))
 
     def get_all_traces(self):

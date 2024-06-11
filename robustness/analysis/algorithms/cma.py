@@ -2,13 +2,14 @@ import cma
 import numpy as np
 
 from robustness.analysis import *
-from robustness.analysis.utils import normalize, scale
+from robustness.analysis.utils import compute_cosine_similarity, normalize, scale
 
 
 class CMASystemEvaluator(SystemEvaluator):
     def __init__(self, sigma, phi: TraceEvaluator, opts=None):
         super().__init__(phi, opts)
         self.sigma = sigma
+        self.obj_best_signal_values = None
     
     def eval_sys(self, delta, problem: Problem):
         timeout = self._options['timeout']
@@ -18,9 +19,17 @@ class CMASystemEvaluator(SystemEvaluator):
         env, x0_bounds = problem.env.instantiate(delta)
         min_v = np.inf
         min_x0 = None
+        logger = {}
+
+        def eval_trace(x):
+            scaled_x = scale(x, x0_bounds)
+            v = self._eval_trace(scaled_x, env, problem.agent)
+            logger[tuple(scaled_x)] = (v, self.last_obs_record)
+            return v
+
         for _ in range(1 + restarts):
             x, es = cma.fmin2(
-                lambda x: self._eval_trace(scale(x, x0_bounds), env, problem.agent),
+                eval_trace,
                 lambda: np.random.rand(len(x0_bounds)),
                 self.sigma,
                 {'bounds': [0.0, 1.0], 'maxfevals': max_evals, 'timeout': timeout * 60, 'verbose': -9},
@@ -30,7 +39,21 @@ class CMASystemEvaluator(SystemEvaluator):
                 min_v = v
                 min_x0 = x0
         env.close()
+        self.obj_best_signal_values = logger[tuple(min_x0)][1]
         return min_v, min_x0
+
+
+class CMASystemEvaluatorWithHeuristic(CMASystemEvaluator):
+    def __init__(self, sigma, phi: TraceEvaluator, delta_0_signals, opts=None):
+        super().__init__(sigma, phi, opts)
+        self.delta_0_signals = delta_0_signals
+        self.obj_best = None
+    
+    def eval_sys(self, delta, problem: Problem):
+        obj_best, x0 = super().eval_sys(delta, problem)
+        self.obj_best = obj_best
+        cos_similarity = compute_cosine_similarity(self.delta_0_signals, self.obj_best_signal_values)
+        return obj_best + cos_similarity, x0
 
 
 class CMASolver(Solver):
