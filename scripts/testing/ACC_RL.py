@@ -60,23 +60,23 @@ plt.savefig(f'gifs/ACC/RL/fig-violations-cma-all.png', bbox_inches='tight')
 #     plt.savefig('gifs/ACC/RL/fig-unsafe-region-cma.png', bbox_inches='tight')
 
 # Use random search
-solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
-evaluator = Evaluator(prob, solver)
-experiment = Experiment(evaluator)
+# solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
+# evaluator = Evaluator(prob, solver)
+# experiment = Experiment(evaluator)
 
-print('Find violations by random search...')
-records_random = experiment.record_min_violations(out_dir='data/ACC/RL/random')
-records_random, violations_random = experiment.summarize_violations(records_random, 'data/ACC/RL/random')
-# Plot the samples
-for i in range(len(records_random)):
-    samples = [(X, Y) for (X, Y, _) in records_random[i]]
-    experiment.plot_samples(samples, 'Max acceleration', 'Min acceleration', 'data/ACC/RL', n=20)
-    plt.title('Violations found by Random')
-    plt.savefig(f'gifs/ACC/RL/fig-violations-random-{i}.png', bbox_inches='tight')
+# print('Find violations by random search...')
+# records_random = experiment.record_min_violations(out_dir='data/ACC/RL/random')
+# records_random, violations_random = experiment.summarize_violations(records_random, 'data/ACC/RL/random')
+# # Plot the samples
+# for i in range(len(records_random)):
+#     samples = [(X, Y) for (X, Y, _) in records_random[i]]
+#     experiment.plot_samples(samples, 'Max acceleration', 'Min acceleration', 'data/ACC/RL', n=20)
+#     plt.title('Violations found by Random')
+#     plt.savefig(f'gifs/ACC/RL/fig-violations-random-{i}.png', bbox_inches='tight')
 
-experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Max acceleration', 'Min acceleration', 'data/ACC/RL', n=20)
-# plt.title('ACC-SAC with Random')
-plt.savefig(f'gifs/ACC/RL/fig-violations-random-all.png', bbox_inches='tight')
+# experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Max acceleration', 'Min acceleration', 'data/ACC/RL', n=20)
+# # plt.title('ACC-SAC with Random')
+# plt.savefig(f'gifs/ACC/RL/fig-violations-random-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
 # min_violation = experiment.min_violation_of_all(violations_random)

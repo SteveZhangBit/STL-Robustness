@@ -67,23 +67,23 @@ plt.savefig(f'gifs/car-run-ppo/fig-violations-cma-all.png', bbox_inches='tight')
 # evaluator.visualize_violation(delta, gif="gifs/car-run-ppo/counterexample.gif", render=True)
 
 # Use random search
-solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
-evaluator = Evaluator(prob, solver)
-experiment = Experiment(evaluator)
+# solver = RandomSolver(sys_eval, {'restarts': 1, 'evals': 50})
+# evaluator = Evaluator(prob, solver)
+# experiment = Experiment(evaluator)
 
-print('Find violations by random search...')
-records_random = experiment.record_min_violations(out_dir='data/car-run-ppo/random')
-records_random, violations_random = experiment.summarize_violations(records_random, 'data/car-run-ppo/random')
-# Plot all samples
-for i in range(len(records_random)):
-    samples = [(X, Y) for (X, Y, _) in records_random[i]]
-    experiment.plot_samples(samples, 'Speed', 'Steering', 'data/car-run-ppo', n=20)
-    plt.title('Violations found by random search')
-    plt.savefig(f'gifs/car-run-ppo/fig-violations-random-{i}.png', bbox_inches='tight')
+# print('Find violations by random search...')
+# records_random = experiment.record_min_violations(out_dir='data/car-run-ppo/random')
+# records_random, violations_random = experiment.summarize_violations(records_random, 'data/car-run-ppo/random')
+# # Plot all samples
+# for i in range(len(records_random)):
+#     samples = [(X, Y) for (X, Y, _) in records_random[i]]
+#     experiment.plot_samples(samples, 'Speed', 'Steering', 'data/car-run-ppo', n=20)
+#     plt.title('Violations found by random search')
+#     plt.savefig(f'gifs/car-run-ppo/fig-violations-random-{i}.png', bbox_inches='tight')
 
-experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Speed', 'Steering', 'data/car-run-ppo', n=20)
-# plt.title('Car-Run-PPO with Random')
-plt.savefig(f'gifs/car-run-ppo/fig-violations-random-all.png', bbox_inches='tight')
+# experiment.plot_samples([[(X, Y) for (X, Y, _) in r] for r in records_random], 'Speed', 'Steering', 'data/car-run-ppo', n=20)
+# # plt.title('Car-Run-PPO with Random')
+# plt.savefig(f'gifs/car-run-ppo/fig-violations-random-all.png', bbox_inches='tight')
 
 # Find the minimum violation and certify an unsafe region
 # min_violation = experiment.min_violation_of_all(violations_random)
