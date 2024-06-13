@@ -35,7 +35,8 @@ WORKDIR /STL-Robustness
 SHELL ["conda", "run", "--no-capture-output", "-n", "gym_robust", "/bin/bash", "-c"]
 RUN pip install -e . \
     && pip install swig gym==0.21.0 stable-baselines3==1.6.2 \
-    && pip install box2d-py==2.3.5 pygame==2.1.2 pyglet==1.5.0
+    && pip install box2d-py==2.3.5 pygame==2.1.2 pyglet==1.5.0 \
+    && pip install rtamt psy_taliro
     # && cd /rtamt \
     # && pip install . \
     # && pip install psy_taliro \
@@ -46,7 +47,8 @@ RUN pip install -e . \
     && pip install -e ./lib/Bullet-Safety-Gym \
     && pip install -e ./lib/robustness-of-safe-rl \
     && pip install -r ./lib/robustness-of-safe-rl/requirement.txt \
-    && pip install git+https://github.com/MFreidank/pysgmcmc@pytorch
+    && pip install git+https://github.com/MFreidank/pysgmcmc@pytorch \
+    && pip install rtamt psy_taliro
     # && cd /rtamt \
     # && pip install . \
     # && pip install psy_taliro \
