@@ -32,7 +32,8 @@ Under the root of this project, we need to create two conda virtual environments
 Configure the gym_robust environment, this environment is used to run the OpenAI-Gym case studies:
 ```
 conda activate gym_robust
-pip install -e . \
+pip install --upgrade setuptools==65.6.3 wheel==0.37.1 \
+    && pip install -e . \
     && pip install swig gym==0.21.0 stable-baselines3==1.6.2 \
     && pip install box2d-py==2.3.5 pygame==2.1.2 pyglet==1.5.0 \
     && pip install rtamt psy_taliro
@@ -41,7 +42,8 @@ pip install -e . \
 Configure the bullet_robust environment, this environment is used to run the PyBullet case studies:
 ```
 conda activate bullet_robust
-pip install -e . \
+pip install --upgrade setuptools==65.6.3 wheel==0.37.1 \
+    && pip install -e . \
     && pip install -e ./lib/Bullet-Safety-Gym \
     && pip install -e ./lib/robustness-of-safe-rl \
     && pip install -r ./lib/robustness-of-safe-rl/requirement.txt \
@@ -49,7 +51,28 @@ pip install -e . \
     && pip install rtamt psy_taliro
 ```
 
-To run the Matlab Simulink environments, either environment should work. However, it should have Matlab installed. We tested against **Matlab R2022b**.
+To run the Matlab Simulink environments, install the Python matlab engine:
+```
+pip install matlabengine
+```
+Also, it should have Matlab installed. We tested against **Matlab R2022b**.
+
+## Docker Install
+We recommend using Docker to test and run the benchmark (except for the Matlab envs). To build the Docker image, run:
+```
+docker build -t stl-robustness .
+```
+
+Or you can choose to pull from Dockerhub:
+```
+docker pull changjianzhangcmu/stl-robustness
+```
+
+To start a docker image, run:
+```
+docker run -it --rm stl-robustness
+```
+Then, run the script files as described below.
 
 ## Folder structure
 - **`robustness`: the reusable Python package for our robustness evaluation tool.**
@@ -73,7 +96,7 @@ This script runs the cartpole+dqn benchmark problem with CMA-ES. The results wil
 
 Running other benchmark problems in other modes is similar, just to find the corresponding run scripts under `scripts`.
 
-The problems used in the paper are with CMA-ES search:
+The problems used in the paper with CMA-ES search are:
 - `scripts/testing/cartpole_dqn.py`
 - `scripts/testing/lunar_lander_ppo.py`
 - `scripts/testing/car_circle.py`
@@ -103,7 +126,7 @@ conda activate gym_robust
 python tests/test_cartpole_dqn_cma_heuristics.py
 ```
 
-### Breach one-layer baseline test
+### Breach one-layer baseline test (this needs Matlab installed)
 ```
 conda activate gym_robust
 python tests/test_WTK_T_baseline.py

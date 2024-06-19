@@ -20,8 +20,10 @@ setuptools.setup(
         'imageio',
         'pygmo',
         'statsmodels',
-        'matlabengine',
     ],
+    extras_require={
+        'matlab': ['matlabengine']
+    },
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
